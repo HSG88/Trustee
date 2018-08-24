@@ -1,0 +1,22 @@
+enclave { 
+    from "TLSLIB.edl" import *;
+
+    include "sgx_report.h"
+    include "stddef.h"
+    include "sgx_tseal.h"
+    
+    struct BID{
+    unsigned char publicKey[32];
+    unsigned char cipher[32];
+};
+    trusted {
+        //public int EnclaveCreateReport([in] sgx_target_info_t* quote, [out] sgx_report_t* report);
+        //public int EnclaveGetMR([out] uint8_t mr[32]);
+        
+        public int EnclaveStart([out, size=624] sgx_sealed_data_t* sealed, [out] size_t* len, [out] uint8_t contractPublicKey[64], [out] uint8_t address[20],[out] uint8_t encryptPublicKey[32]);
+        public int EnclaveUnsealPrivateKeys([in, size=624] sgx_sealed_data_t* sealed);
+        public void EnclaveAuctionWinner([in, count = _count] BID* bids, size_t _count, [out] uint32_t* winnerIndex, [out] uint32_t* winnerBid, [out] uint8_t signature[32]);
+        
+        public void BidderEncrypt([in, size=32] uint8_t* sgxPublicKey, [out, size =64] BID* bid);
+    };
+};

@@ -1,0 +1,344 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Prerelease|Win32">
+      <Configuration>Prerelease</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Simulation|Win32">
+      <Configuration>Simulation</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Prerelease|x64">
+      <Configuration>Prerelease</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Simulation|x64">
+      <Configuration>Simulation</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{04B626BF-DE80-4D50-9623-AFC1AF93B67C}</ProjectGuid>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(NoInherit)</IncludePath>
+    <LibraryPath>$(NoInherit)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|Win32'">
+    <IncludePath>$(NoInherit)</IncludePath>
+    <LibraryPath>$(NoInherit)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(NoInherit)</IncludePath>
+    <LibraryPath>$(NoInherit)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|Win32'">
+    <IncludePath>$(NoInherit)</IncludePath>
+    <LibraryPath>$(NoInherit)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(NoInherit)</IncludePath>
+    <LibraryPath>$(NoInherit)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|x64'">
+    <IncludePath>$(NoInherit)</IncludePath>
+    <LibraryPath>$(NoInherit)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(NoInherit)</IncludePath>
+    <LibraryPath>$(NoInherit)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">
+    <IncludePath>$(NoInherit)</IncludePath>
+    <LibraryPath>$(NoInherit)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <Optimization>Disabled</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\libc++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Lib>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|Win32'">
+    <ClCompile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <Optimization>Disabled</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\libc++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Lib>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <Optimization>MaxSpeed</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\libc++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Lib>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|Win32'">
+    <ClCompile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <Optimization>MaxSpeed</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\libc++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Lib>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <Optimization>Disabled</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\libc++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Lib>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Simulation|x64'">
+    <ClCompile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <Optimization>Disabled</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\libc++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Lib>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <Optimization>MaxSpeed</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\libc++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Lib>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">
+    <ClCompile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <Optimization>MaxSpeed</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)include\tlibc;$(SGXSDKInstallPath)include\libc++;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Lib>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="TLSlib.h" />
+    <ClInclude Include="TLSLIB_t.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="TLSLIB.edl">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(SGXSDKInstallPath)bin\win32\release\sgx_edger8r.exe" --trusted "%(FullPath)" --search-path "$(SGXSDKInstallPath)include" --header-only</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Creating proxy/bridge routines</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename)_t.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(SGXSDKInstallPath)bin\win32\release\sgx_edger8r.exe" --trusted "%(FullPath)" --search-path "$(SGXSDKInstallPath)include" --header-only</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Creating proxy/bridge routines</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename)_t.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(SGXSDKInstallPath)bin\win32\release\sgx_edger8r.exe" --trusted "%(FullPath)" --search-path "$(SGXSDKInstallPath)include" --header-only</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Creating proxy/bridge routines</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename)_t.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(SGXSDKInstallPath)bin\win32\release\sgx_edger8r.exe" --trusted "%(FullPath)" --search-path "$(SGXSDKInstallPath)include" --header-only</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Creating proxy/bridge routines</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename)_t.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Prerelease|Win32'">"$(SGXSDKInstallPath)bin\win32\release\sgx_edger8r.exe" --trusted "%(FullPath)" --search-path "$(SGXSDKInstallPath)include" --header-only</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Prerelease|Win32'">Creating proxy/bridge routines</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Prerelease|Win32'">%(Filename)_t.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Simulation|Win32'">"$(SGXSDKInstallPath)bin\win32\release\sgx_edger8r.exe" --trusted "%(FullPath)" --search-path "$(SGXSDKInstallPath)include" --header-only</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Simulation|Win32'">Creating proxy/bridge routines</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Simulation|Win32'">%(Filename)_t.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Simulation|x64'">"$(SGXSDKInstallPath)bin\win32\release\sgx_edger8r.exe" --trusted "%(FullPath)" --search-path "$(SGXSDKInstallPath)include" --header-only</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Simulation|x64'">Creating proxy/bridge routines</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Simulation|x64'">%(Filename)_t.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">"$(SGXSDKInstallPath)bin\win32\release\sgx_edger8r.exe" --trusted "%(FullPath)" --search-path "$(SGXSDKInstallPath)include" --header-only</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">Creating proxy/bridge routines</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">%(Filename)_t.h;%(Outputs)</Outputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="aes.c" />
+    <ClCompile Include="aesni.c" />
+    <ClCompile Include="arc4.c" />
+    <ClCompile Include="asn1parse.c" />
+    <ClCompile Include="asn1write.c" />
+    <ClCompile Include="base64.c" />
+    <ClCompile Include="bignum.c" />
+    <ClCompile Include="blowfish.c" />
+    <ClCompile Include="camellia.c" />
+    <ClCompile Include="ccm.c" />
+    <ClCompile Include="certs.c" />
+    <ClCompile Include="cipher.c" />
+    <ClCompile Include="cipher_wrap.c" />
+    <ClCompile Include="ctr_drbg.c" />
+    <ClCompile Include="debug.c" />
+    <ClCompile Include="des.c" />
+    <ClCompile Include="dhm.c" />
+    <ClCompile Include="ecdh.c" />
+    <ClCompile Include="ecdsa.c" />
+    <ClCompile Include="ecjpake.c" />
+    <ClCompile Include="ecp.c" />
+    <ClCompile Include="ecp_curves.c" />
+    <ClCompile Include="entropy.c" />
+    <ClCompile Include="entropy_poll.c" />
+    <ClCompile Include="error.c" />
+    <ClCompile Include="gcm.c" />
+    <ClCompile Include="glue.c" />
+    <ClCompile Include="havege.c" />
+    <ClCompile Include="hmac_drbg.c" />
+    <ClCompile Include="md.c" />
+    <ClCompile Include="md2.c" />
+    <ClCompile Include="md4.c" />
+    <ClCompile Include="md5.c" />
+    <ClCompile Include="md_wrap.c" />
+    <ClCompile Include="memory_buffer_alloc.c" />
+    <ClCompile Include="net.c" />
+    <ClCompile Include="OCall.c" />
+    <ClCompile Include="oid.c" />
+    <ClCompile Include="padlock.c" />
+    <ClCompile Include="pem.c" />
+    <ClCompile Include="pk.c" />
+    <ClCompile Include="pkcs11.c" />
+    <ClCompile Include="pkcs12.c" />
+    <ClCompile Include="pkcs5.c" />
+    <ClCompile Include="pkparse.c" />
+    <ClCompile Include="pkwrite.c" />
+    <ClCompile Include="pk_wrap.c" />
+    <ClCompile Include="platform.c" />
+    <ClCompile Include="ripemd160.c" />
+    <ClCompile Include="rsa.c" />
+    <ClCompile Include="sha1.c" />
+    <ClCompile Include="sha256.c" />
+    <ClCompile Include="sha512.c" />
+    <ClCompile Include="ssl_cache.c" />
+    <ClCompile Include="ssl_ciphersuites.c" />
+    <ClCompile Include="ssl_cli.c" />
+    <ClCompile Include="ssl_cookie.c" />
+    <ClCompile Include="ssl_srv.c" />
+    <ClCompile Include="ssl_ticket.c" />
+    <ClCompile Include="ssl_tls.c" />
+    <ClCompile Include="threading.c" />
+    <ClCompile Include="timing.c" />
+    <ClCompile Include="version.c" />
+    <ClCompile Include="version_features.c" />
+    <ClCompile Include="x509.c" />
+    <ClCompile Include="x509write_crt.c" />
+    <ClCompile Include="x509write_csr.c" />
+    <ClCompile Include="x509_create.c" />
+    <ClCompile Include="x509_crl.c" />
+    <ClCompile Include="x509_crt.c" />
+    <ClCompile Include="x509_csr.c" />
+    <ClCompile Include="xtea.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

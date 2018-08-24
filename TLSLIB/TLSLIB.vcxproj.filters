@@ -1,0 +1,251 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{d906a021-3e35-485b-8275-3c115c2f14e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{265276de-9d6a-4bf0-8532-f2b8a2c84d02}</UniqueIdentifier>
+      <Extensions>cpp;c;edl;def;</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{e450d8cb-6042-495e-89ef-5f6bdfb5d90c}</UniqueIdentifier>
+      <Extensions>h;hpp;</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{1090d8d2-c17b-47e5-af04-9b34287aaa81}</UniqueIdentifier>
+      <Extensions>rc;xml;pem;</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TLSLIB_t.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TLSlib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="TLSLIB.edl">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="aes.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="aesni.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="arc4.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1parse.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1write.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="base64.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bignum.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="blowfish.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="camellia.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ccm.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="certs.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cipher.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cipher_wrap.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ctr_drbg.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="des.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dhm.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdh.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdsa.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ecjpake.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ecp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ecp_curves.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="entropy.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="entropy_poll.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="error.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gcm.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="havege.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hmac_drbg.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="md.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="md_wrap.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="md2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="md4.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="md5.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="memory_buffer_alloc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="net.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OCall.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="oid.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="padlock.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pem.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pk.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pk_wrap.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs5.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs11.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs12.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pkparse.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pkwrite.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="platform.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ripemd160.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sha1.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sha256.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sha512.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ssl_cache.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ssl_ciphersuites.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ssl_cli.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ssl_cookie.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ssl_srv.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ssl_ticket.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ssl_tls.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="threading.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="timing.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="version.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="version_features.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x509.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x509_create.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x509_crl.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x509_crt.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x509_csr.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x509write_crt.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x509write_csr.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="xtea.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="glue.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
