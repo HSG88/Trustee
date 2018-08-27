@@ -160,6 +160,15 @@ void EnclaveAuctionWinner(BID* bids, size_t count, uint32_t* winnerIndex, uint32
 	*winnerBid = max;
 	*winnerIndex =maxIndex;
 }
+
+/*
+Transaction input = function ID + Hash of bids + winner publicDH = 4+32+32 =68
+*/
+void EnclaveAuctionWinnerTransaction(BID* bids, size_t count, uint8_t transactionInput[68])
+{
+
+}
+
 int EnclaveSign(const uint8_t *data, size_t in_len, uint8_t *rr, uint8_t *ss, uint8_t *vv)
 {
 	int ret;
