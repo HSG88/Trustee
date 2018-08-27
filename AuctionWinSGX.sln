@@ -14,7 +14,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Auction", "Auction\Auction.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bidders", "Bidders", "{17E34114-A710-487F-8554-F018798F7B26}"
 	ProjectSection(SolutionItems) = preProject
+		Auction.sol = Auction.sol
 		Bidders\client.js = Bidders\client.js
+		Bidders\Interact.js = Bidders\Interact.js
 		Bidders\package-lock.json = Bidders\package-lock.json
 	EndProjectSection
 EndProject

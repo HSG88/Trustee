@@ -147,12 +147,16 @@ int EnclaveStart(sgx_sealed_data_t *sealed, size_t *len, uint8_t sgxPublicKey[64
 
 	//init DH key-pair
 	mbedtls_ecdh_init(&ctxDH);
-	//MBEDTLS_ERR_ECP_BAD_INPUT_DATA
 	mbedtls_ecp_group_load(&ctxDH.grp, MBEDTLS_ECP_DP_CURVE25519);
+#ifdef RANDOM
 	mbedtls_ecdh_gen_public( &ctxDH.grp, &ctxDH.d, &ctxDH.Q, mbedtls_sgx_drbg_random, NULL );
+#else
+	mbedtls_mpi_read_string(&ctxDH.d, 16, "4B04D79CED79DCF14A730D64F7FC48D5AB6E160548EF1F8008EF9ADD5425AE78");
+	ret = mbedtls_ecp_mul(&ctxDH.grp, &ctxDH.Q, &ctxDH.d, &ctxDH.grp.G, NULL, NULL);
 	mbedtls_mpi_write_binary(&ctxDH.d, dhPrivateKey,sizeof(dhPrivateKey));
+	Dump("DH Private", dhPrivateKey, sizeof(dhPrivateKey));
 	mbedtls_mpi_write_binary(&ctxDH.Q.X, tmpDHPublicKey, sizeof(tmpDHPublicKey));
-	
+#endif
 	//compute contract address
 	keccak(tmpDSAPublicKey + 1, 64, tmpcontractAddress, 32);
 	
@@ -250,7 +254,7 @@ void test()
 }
 void BidderEncrypt(uint8_t* sgxPublicKey, BID* bid)
 {
-	test();
+	//test();
 	uint8_t  key[32];
 	BID tmpBid;
 	mbedtls_ecdh_context ctx;
