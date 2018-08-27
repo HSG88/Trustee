@@ -54,13 +54,6 @@ void Dump(char* title, uint8_t *input, size_t size)
 
 /* Global EID shared by multiple threads */
 sgx_enclave_id_t global_eid = 0;
-void DumpAddress(unsigned char address[20])
-{
-	printf("address: ");
-	for (int i = 0; i < 20; i++)
-		printf("%0X", address[i]);
-	printf("\n");
-}
 int initialize_enclave(void)
 {
 	char token_path[MAX_PATH] = { '\0' };
@@ -164,10 +157,13 @@ void LoadData()
 	ReadFile(hFile, address, 20, &length, NULL);
 	ReadFile(hFile, dhPublicKey, sizeof(dhPublicKey), &length, NULL);
 	CloseHandle(hFile);
-	//Dump("SGX_ADDRESS", address, 20);
-	//Dump("Public DH Key", dhPublicKey, 32);
+	Dump("SGX_ADDRESS", address, 20);
+	Dump("Public DH Key", dhPublicKey, 32);
+
+	
 
 	EnclaveUnsealPrivateKeys(global_eid, &ret, sealed);
+	BidderEncrypt(global_eid, dhPublicKey, &bids[9]);
 	printf("Enter contract address:\n");
 	char tmpAddress[41];
 	fgets(tmpAddress, sizeof(tmpAddress), stdin);

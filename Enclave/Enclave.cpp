@@ -147,6 +147,7 @@ int EnclaveStart(sgx_sealed_data_t *sealed, size_t *len, uint8_t sgxPublicKey[64
 
 	//init DH key-pair
 	mbedtls_ecdh_init(&ctxDH);
+	//MBEDTLS_ERR_ECP_BAD_INPUT_DATA
 	mbedtls_ecp_group_load(&ctxDH.grp, MBEDTLS_ECP_DP_CURVE25519);
 	mbedtls_ecdh_gen_public( &ctxDH.grp, &ctxDH.d, &ctxDH.Q, mbedtls_sgx_drbg_random, NULL );
 	mbedtls_mpi_write_binary(&ctxDH.d, dhPrivateKey,sizeof(dhPrivateKey));
@@ -216,12 +217,43 @@ void EnclaveAuctionWinner(BID* bids, size_t count, uint8_t contractAddress[20], 
 	CreateTransaction(contractAddress, inputHash, winnerIndex, winnerBid, transaction);
 }
 
+void test()
+{
+	uint8_t key[32];
+	uint32_t value = 5000;
+	size_t llen;
+	int ret;
+	char buff[70];
+	//compute shared
+	ret= mbedtls_mpi_read_string(&ctxDH.Qp.X, 16, "552B6BC29A6ED0B26B8B233BDC54B596256CE872996F621B3A1876F1390DE86D");
+	ret = mbedtls_mpi_lset(&ctxDH.Qp.Z, 1);
+	ret = mbedtls_ecdh_compute_shared(&ctxDH.grp, &ctxDH.z, &ctxDH.Qp, &ctxDH.d, NULL, NULL);
+	mbedtls_mpi_write_binary(&ctxDH.z, key, 32);
+	
+	uint8_t cipher[32] = { 0 };
+	mbedtls_mpi iv;
+	mbedtls_mpi_init(&iv);
+	mbedtls_mpi_read_string(&iv, 16, "A420B61967834D116CC6206B");
+	mbedtls_mpi_write_binary(&iv, cipher + SGX_AESGCM_MAC_SIZE, 12);
+
+	Dump("IV", cipher+ SGX_AESGCM_MAC_SIZE, 12);
+	Dump("Key", key, 16);
+	sgx_rijndael128GCM_encrypt(
+		(sgx_aes_gcm_128bit_key_t*)&key,
+		(uint8_t *)&value, sizeof(value),
+		cipher + SGX_AESGCM_MAC_SIZE + SGX_AESGCM_IV_SIZE,
+		cipher + SGX_AESGCM_MAC_SIZE, SGX_AESGCM_IV_SIZE,
+		NULL, 0,
+		(sgx_aes_gcm_128bit_tag_t *)(cipher));
+	Dump("Cipher", cipher, 32);
+	
+}
 void BidderEncrypt(uint8_t* sgxPublicKey, BID* bid)
 {
+	test();
 	uint8_t  key[32];
 	BID tmpBid;
 	mbedtls_ecdh_context ctx;
-
 	//generate keys and compute shared key
 	mbedtls_ecdh_init(&ctx);
 	mbedtls_ecp_group_load(&ctx.grp, MBEDTLS_ECP_DP_CURVE25519);
