@@ -18,9 +18,8 @@ typedef struct ms_EnclaveUnsealPrivateKeys_t {
 typedef struct ms_EnclaveAuctionWinner_t {
 	BID* ms_bids;
 	size_t ms__count;
-	uint32_t* ms_winnerIndex;
-	uint32_t* ms_winnerBid;
-	uint8_t* ms_signature;
+	uint8_t* ms_contractAddress;
+	uint8_t* ms_transaction;
 } ms_EnclaveAuctionWinner_t;
 
 typedef struct ms_BidderEncrypt_t {
@@ -230,15 +229,14 @@ sgx_status_t EnclaveUnsealPrivateKeys(sgx_enclave_id_t eid, int* retval, sgx_sea
 	return status;
 }
 
-sgx_status_t EnclaveAuctionWinner(sgx_enclave_id_t eid, BID* bids, size_t _count, uint32_t* winnerIndex, uint32_t* winnerBid, uint8_t signature[32])
+sgx_status_t EnclaveAuctionWinner(sgx_enclave_id_t eid, BID* bids, size_t _count, uint8_t contractAddress[20], uint8_t transaction[204])
 {
 	sgx_status_t status;
 	ms_EnclaveAuctionWinner_t ms;
 	ms.ms_bids = bids;
 	ms.ms__count = _count;
-	ms.ms_winnerIndex = winnerIndex;
-	ms.ms_winnerBid = winnerBid;
-	ms.ms_signature = (uint8_t*)signature;
+	ms.ms_contractAddress = (uint8_t*)contractAddress;
+	ms.ms_transaction = (uint8_t*)transaction;
 	status = sgx_ecall(eid, 2, &ocall_table_Enclave, &ms);
 	return status;
 }

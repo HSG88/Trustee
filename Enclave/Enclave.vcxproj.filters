@@ -33,15 +33,6 @@
     <ClCompile Include="Log.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="commons.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="encodings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="transaction.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Enclave_t.h">
@@ -57,15 +48,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Enclave.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Transaction.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="encoding.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="commons.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

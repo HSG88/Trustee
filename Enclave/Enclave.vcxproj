@@ -329,24 +329,18 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="commons.cpp" />
     <ClCompile Include="debug.c" />
     <ClCompile Include="Enclave.cpp" />
     <ClCompile Include="Enclave_t.c" />
-    <ClCompile Include="encodings.cpp" />
     <ClCompile Include="keccak.c" />
     <ClCompile Include="Log.c" />
-    <ClCompile Include="transaction.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="commons.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="Enclave.h" />
     <ClInclude Include="Enclave_t.h" />
-    <ClInclude Include="encoding.h" />
     <ClInclude Include="keccak.h" />
     <ClInclude Include="Log.h" />
-    <ClInclude Include="Transaction.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Enclave.edl">

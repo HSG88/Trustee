@@ -25,7 +25,7 @@ typedef struct BID {
 
 int EnclaveStart(sgx_sealed_data_t* sealed, size_t* len, uint8_t contractPublicKey[64], uint8_t address[20], uint8_t encryptPublicKey[32]);
 int EnclaveUnsealPrivateKeys(sgx_sealed_data_t* sealed);
-void EnclaveAuctionWinner(BID* bids, size_t _count, uint32_t* winnerIndex, uint32_t* winnerBid, uint8_t signature[32]);
+void EnclaveAuctionWinner(BID* bids, size_t _count, uint8_t contractAddress[20], uint8_t transaction[204]);
 void BidderEncrypt(uint8_t* sgxPublicKey, BID* bid);
 
 sgx_status_t SGX_CDECL ocall_mbedtls_net_connect(int* retval, mbedtls_net_context* ctx, const char* host, const char* port, int proto);
