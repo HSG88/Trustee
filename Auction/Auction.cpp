@@ -11,9 +11,56 @@
 #include "Auction.h"
 #include"Enclave_u.h"
 
+void HexToBinary(uint8_t* input, uint8_t* output, size_t size)
+{
+	uint8_t byte1, byte2;
+	for (int i = 0; i < size; i++)
+	{
+		byte1 = *input++;
+		byte2 = *input++;
+		if (byte1 >= '0' && byte1 <= '9') byte1 -= '0';
+		else if (byte1 >= 'A' && byte1 <= 'F') byte1 = byte1- 'A' + 10;
+		else if (byte1 >= 'a' && byte1 <= 'f') byte1 = byte1 - 'a' + 10;
+		if (byte2 >= '0' && byte2 <= '9') byte2 -= '0';
+		else if (byte2 >= 'A' && byte2 <= 'F') byte2 = byte2 - 'A' + 10;
+		else if (byte2 >= 'a' && byte2 <= 'f') byte2 = byte2 - 'a' + 10;
+		output[i] = (byte1 << 4) | byte2;	
+	}
+}
+
+void BinaryToHex(uint8_t* input, uint8_t* output, size_t size)
+{
+	uint8_t byte1, byte2;
+	for (int i = 0; i < size; i+=2)
+	{
+		byte1 = *input >> 4;
+		byte2 = *input & 0xf;
+		if (byte1 >= 0 && byte1 <= 9) byte1 += '0';
+		else if (byte1 >= 10 && byte1 <= 15) byte1 += 'A' + 10;
+		if (byte2 >= 0 && byte2 <= 9) byte2 += '0';
+		else if (byte2 >= 10 && byte2 <= 15) byte2 += 'A' + 10;
+		output[i] = byte1;
+		output[i + 1] = byte2;
+	}
+}
+
+void Dump(char* title, uint8_t *input, size_t size)
+{
+	printf("%s\n", title);
+	for (int i = 0; i < size; i++)
+		printf("%02X", input[i]);
+	printf("\n");
+}
+
 /* Global EID shared by multiple threads */
 sgx_enclave_id_t global_eid = 0;
-
+void DumpAddress(unsigned char address[20])
+{
+	printf("address: ");
+	for (int i = 0; i < 20; i++)
+		printf("%0X", address[i]);
+	printf("\n");
+}
 int initialize_enclave(void)
 {
 	char token_path[MAX_PATH] = { '\0' };
@@ -76,6 +123,60 @@ int initialize_enclave(void)
 }
 
 
+void SaveData()
+{
+	HANDLE hFile = CreateFile("data", GENERIC_WRITE, NULL, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	sgx_sealed_data_t* sealed = (sgx_sealed_data_t*)malloc(624);
+	size_t len;
+	int ret;
+	DWORD length;
+	unsigned char pubKey[64] = { 0 }, address[20] = { 0 }, dhPublicKey[32];
+	EnclaveStart(global_eid, &ret, sealed, &len, pubKey, address, dhPublicKey);
+	BID bids[10];
+	for (int i = 0; i < 10; i++)
+	{
+		BidderEncrypt(global_eid, dhPublicKey, &bids[i]);
+		WriteFile(hFile, bids[i].publicKey, 32, &length, NULL);
+		WriteFile(hFile, bids[i].cipher, 32, &length, NULL);
+	}
+	WriteFile(hFile, (unsigned char*)sealed, 624, &length, NULL);
+	WriteFile(hFile, pubKey, 64, &length, NULL);
+	WriteFile(hFile, address, 20, &length, NULL);
+	WriteFile(hFile, dhPublicKey, sizeof(dhPublicKey), &length, NULL);
+	CloseHandle(hFile);
+}
+void LoadData()
+{
+	HANDLE hFile = CreateFile("data", GENERIC_READ, NULL, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	sgx_sealed_data_t* sealed = (sgx_sealed_data_t*)malloc(624);
+	size_t len;
+	int ret;
+	DWORD length;
+	BID bids[10];
+	unsigned char pubKey[64] = { 0 }, address[20] = { 0 }, dhPublicKey[32];
+	for (int i = 0; i < 10; i++)
+	{
+		ReadFile(hFile, bids[i].publicKey, 32, &length, NULL);
+		ReadFile(hFile, bids[i].cipher, 32, &length, NULL);
+	}
+	ReadFile(hFile, (unsigned char*)sealed, 624, &length, NULL);
+	ReadFile(hFile, pubKey, 64, &length, NULL);
+	ReadFile(hFile, address, 20, &length, NULL);
+	ReadFile(hFile, dhPublicKey, sizeof(dhPublicKey), &length, NULL);
+	CloseHandle(hFile);
+	//Dump("SGX_ADDRESS", address, 20);
+	//Dump("Public DH Key", dhPublicKey, 32);
+
+	EnclaveUnsealPrivateKeys(global_eid, &ret, sealed);
+	printf("Enter contract address:\n");
+	char tmpAddress[41];
+	fgets(tmpAddress, sizeof(tmpAddress), stdin);
+	uint8_t contractAddress[20], transaction[204];
+	HexToBinary((uint8_t*)tmpAddress, contractAddress, 20);
+	EnclaveAuctionWinner(global_eid, bids, 10, contractAddress, transaction);
+	Dump("Transaction", transaction,204);
+	
+}
 
 
 /* Application entry */
@@ -90,20 +191,10 @@ int SGX_CDECL main(int argc, char *argv[])
 		getchar();
 		return -1;
 	}
-
+	
 	/* Utilize SGX trusted calls*/
-	sgx_sealed_data_t* sealed = (sgx_sealed_data_t*)malloc(624);
-	size_t len;
-	int ret;
-	unsigned char pubKey[64] = { 0 }, address[20] = { 0 }, dhPublicKey[32];
-	EnclaveStart(global_eid, &ret, sealed, &len, pubKey, address, dhPublicKey);
-	BID bids[10];
-	for (int i = 0; i<10; i++)
-		BidderEncrypt(global_eid, dhPublicKey, &bids[i]);
-	uint32_t index, max;
-	uint8_t sig[32];
-	EnclaveAuctionWinner(global_eid, bids, 10, &index, &max, sig);
-	printf("Winner = %u with index =%u\n", max, index);
+	//SaveData();
+	LoadData();
 
 	/* Destroy the enclave */
 	sgx_destroy_enclave(global_eid);
@@ -111,6 +202,6 @@ int SGX_CDECL main(int argc, char *argv[])
 	printf("Info: SampleEnclave successfully returned.\n");
 
 	printf("Enter a character before exit ...\n");
-	getchar();
+	getchar(); getchar();
 	return 0;
 }

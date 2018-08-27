@@ -15,7 +15,7 @@ enclave {
         
         public int EnclaveStart([out, size=624] sgx_sealed_data_t* sealed, [out] size_t* len, [out] uint8_t contractPublicKey[64], [out] uint8_t address[20],[out] uint8_t encryptPublicKey[32]);
         public int EnclaveUnsealPrivateKeys([in, size=624] sgx_sealed_data_t* sealed);
-        public void EnclaveAuctionWinner([in, count = _count] BID* bids, size_t _count, [out] uint32_t* winnerIndex, [out] uint32_t* winnerBid, [out] uint8_t signature[32]);
+        public void EnclaveAuctionWinner([in, count = _count] BID* bids, size_t _count,[in] uint8_t contractAddress[20], [out] uint8_t transaction[204]);
         
         public void BidderEncrypt([in, size=32] uint8_t* sgxPublicKey, [out, size =64] BID* bid);
     };

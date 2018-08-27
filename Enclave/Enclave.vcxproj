@@ -329,26 +329,18 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ABI.cpp" />
-    <ClCompile Include="commons.cpp" />
     <ClCompile Include="debug.c" />
     <ClCompile Include="Enclave.cpp" />
     <ClCompile Include="Enclave_t.c" />
-    <ClCompile Include="encodings.cpp" />
     <ClCompile Include="keccak.c" />
     <ClCompile Include="Log.c" />
-    <ClCompile Include="Transaction.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ABI.h" />
-    <ClInclude Include="commons.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="Enclave.h" />
     <ClInclude Include="Enclave_t.h" />
-    <ClInclude Include="encoding.h" />
     <ClInclude Include="keccak.h" />
     <ClInclude Include="Log.h" />
-    <ClInclude Include="Transaction.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Enclave.edl">
@@ -385,7 +377,6 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">%(Filename)_t.h;%(Filename)_t.c;%(Outputs)</Outputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">Enclave.config.xml;%(AdditionalInputs)</AdditionalInputs>
     </CustomBuild>
-    <None Include="Auction.sol" />
     <None Include="Enclave_private.pem" />
   </ItemGroup>
   <ItemGroup>

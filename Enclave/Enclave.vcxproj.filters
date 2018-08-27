@@ -16,9 +16,6 @@
       <UniqueIdentifier>{7e948785-59bf-4fe9-8aa5-469540e885ce}</UniqueIdentifier>
       <Extensions>rc;xml;pem;</Extensions>
     </Filter>
-    <Filter Include="Contract">
-      <UniqueIdentifier>{1c15ad3e-5a27-4d55-bd4f-8ad35c524d7e}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Enclave_t.c">
@@ -34,18 +31,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Log.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="commons.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="encodings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Transaction.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ABI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -65,25 +50,10 @@
     <ClInclude Include="Enclave.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Transaction.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="encoding.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="commons.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ABI.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Enclave_private.pem">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Auction.sol">
-      <Filter>Contract</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

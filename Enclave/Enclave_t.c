@@ -35,9 +35,8 @@ typedef struct ms_EnclaveUnsealPrivateKeys_t {
 typedef struct ms_EnclaveAuctionWinner_t {
 	BID* ms_bids;
 	size_t ms__count;
-	uint32_t* ms_winnerIndex;
-	uint32_t* ms_winnerBid;
-	uint8_t* ms_signature;
+	uint8_t* ms_contractAddress;
+	uint8_t* ms_transaction;
 } ms_EnclaveAuctionWinner_t;
 
 typedef struct ms_BidderEncrypt_t {
@@ -274,15 +273,12 @@ static sgx_status_t SGX_CDECL sgx_EnclaveAuctionWinner(void* pms)
 	size_t _tmp__count = ms->ms__count;
 	size_t _len_bids = _tmp__count * sizeof(*_tmp_bids);
 	BID* _in_bids = NULL;
-	uint32_t* _tmp_winnerIndex = ms->ms_winnerIndex;
-	size_t _len_winnerIndex = sizeof(*_tmp_winnerIndex);
-	uint32_t* _in_winnerIndex = NULL;
-	uint32_t* _tmp_winnerBid = ms->ms_winnerBid;
-	size_t _len_winnerBid = sizeof(*_tmp_winnerBid);
-	uint32_t* _in_winnerBid = NULL;
-	uint8_t* _tmp_signature = ms->ms_signature;
-	size_t _len_signature = 32 * sizeof(*_tmp_signature);
-	uint8_t* _in_signature = NULL;
+	uint8_t* _tmp_contractAddress = ms->ms_contractAddress;
+	size_t _len_contractAddress = 20 * sizeof(*_tmp_contractAddress);
+	uint8_t* _in_contractAddress = NULL;
+	uint8_t* _tmp_transaction = ms->ms_transaction;
+	size_t _len_transaction = 204 * sizeof(*_tmp_transaction);
+	uint8_t* _in_transaction = NULL;
 
 	if (sizeof(*_tmp_bids) != 0 &&
 		(size_t)_tmp__count > (SIZE_MAX / sizeof(*_tmp_bids))) {
@@ -290,9 +286,8 @@ static sgx_status_t SGX_CDECL sgx_EnclaveAuctionWinner(void* pms)
 	}
 
 	CHECK_UNIQUE_POINTER(_tmp_bids, _len_bids);
-	CHECK_UNIQUE_POINTER(_tmp_winnerIndex, _len_winnerIndex);
-	CHECK_UNIQUE_POINTER(_tmp_winnerBid, _len_winnerBid);
-	CHECK_UNIQUE_POINTER(_tmp_signature, _len_signature);
+	CHECK_UNIQUE_POINTER(_tmp_contractAddress, _len_contractAddress);
+	CHECK_UNIQUE_POINTER(_tmp_transaction, _len_transaction);
 
 	//
 	// fence after pointer checks
@@ -308,45 +303,31 @@ static sgx_status_t SGX_CDECL sgx_EnclaveAuctionWinner(void* pms)
 
 		memcpy(_in_bids, _tmp_bids, _len_bids);
 	}
-	if (_tmp_winnerIndex != NULL && _len_winnerIndex != 0) {
-		if ((_in_winnerIndex = (uint32_t*)malloc(_len_winnerIndex)) == NULL) {
+	if (_tmp_contractAddress != NULL && _len_contractAddress != 0) {
+		_in_contractAddress = (uint8_t*)malloc(_len_contractAddress);
+		if (_in_contractAddress == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
 			goto err;
 		}
 
-		memset((void*)_in_winnerIndex, 0, _len_winnerIndex);
+		memcpy(_in_contractAddress, _tmp_contractAddress, _len_contractAddress);
 	}
-	if (_tmp_winnerBid != NULL && _len_winnerBid != 0) {
-		if ((_in_winnerBid = (uint32_t*)malloc(_len_winnerBid)) == NULL) {
+	if (_tmp_transaction != NULL && _len_transaction != 0) {
+		if ((_in_transaction = (uint8_t*)malloc(_len_transaction)) == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
 			goto err;
 		}
 
-		memset((void*)_in_winnerBid, 0, _len_winnerBid);
-	}
-	if (_tmp_signature != NULL && _len_signature != 0) {
-		if ((_in_signature = (uint8_t*)malloc(_len_signature)) == NULL) {
-			status = SGX_ERROR_OUT_OF_MEMORY;
-			goto err;
-		}
-
-		memset((void*)_in_signature, 0, _len_signature);
+		memset((void*)_in_transaction, 0, _len_transaction);
 	}
 
-	EnclaveAuctionWinner(_in_bids, _tmp__count, _in_winnerIndex, _in_winnerBid, _in_signature);
+	EnclaveAuctionWinner(_in_bids, _tmp__count, _in_contractAddress, _in_transaction);
 err:
 	if (_in_bids) free(_in_bids);
-	if (_in_winnerIndex) {
-		memcpy(_tmp_winnerIndex, _in_winnerIndex, _len_winnerIndex);
-		free(_in_winnerIndex);
-	}
-	if (_in_winnerBid) {
-		memcpy(_tmp_winnerBid, _in_winnerBid, _len_winnerBid);
-		free(_in_winnerBid);
-	}
-	if (_in_signature) {
-		memcpy(_tmp_signature, _in_signature, _len_signature);
-		free(_in_signature);
+	if (_in_contractAddress) free(_in_contractAddress);
+	if (_in_transaction) {
+		memcpy(_tmp_transaction, _in_transaction, _len_transaction);
+		free(_in_transaction);
 	}
 
 	return status;

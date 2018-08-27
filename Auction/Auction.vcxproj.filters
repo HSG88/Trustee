@@ -14,26 +14,26 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="Generated Files">
-      <UniqueIdentifier>{362fcb7a-7318-4697-9acd-21609b331230}</UniqueIdentifier>
+      <UniqueIdentifier>{4e1475a7-8e64-415b-835d-a2b310c45bf0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Auction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Enclave_u.c">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="mbedtls_u.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Enclave_u.c">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Enclave_u.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="Auction.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Enclave_u.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -38,7 +38,7 @@ int SGX_UBRIDGE(SGX_NOCONVENTION, ocall_print_string, (const char* str));
 
 sgx_status_t EnclaveStart(sgx_enclave_id_t eid, int* retval, sgx_sealed_data_t* sealed, size_t* len, uint8_t contractPublicKey[64], uint8_t address[20], uint8_t encryptPublicKey[32]);
 sgx_status_t EnclaveUnsealPrivateKeys(sgx_enclave_id_t eid, int* retval, sgx_sealed_data_t* sealed);
-sgx_status_t EnclaveAuctionWinner(sgx_enclave_id_t eid, BID* bids, size_t _count, uint32_t* winnerIndex, uint32_t* winnerBid, uint8_t signature[32]);
+sgx_status_t EnclaveAuctionWinner(sgx_enclave_id_t eid, BID* bids, size_t _count, uint8_t contractAddress[20], uint8_t transaction[204]);
 sgx_status_t BidderEncrypt(sgx_enclave_id_t eid, uint8_t* sgxPublicKey, BID* bid);
 
 #ifdef __cplusplus
