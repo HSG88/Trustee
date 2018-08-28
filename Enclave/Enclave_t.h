@@ -18,15 +18,8 @@
 extern "C" {
 #endif
 
-typedef struct BID {
-	unsigned char publicKey[32];
-	unsigned char cipher[32];
-} BID;
-
-int EnclaveStart(sgx_sealed_data_t* sealed, size_t* len, uint8_t contractPublicKey[64], uint8_t address[20], uint8_t encryptPublicKey[32]);
-int EnclaveUnsealPrivateKeys(sgx_sealed_data_t* sealed);
-void EnclaveAuctionWinner(BID* bids, size_t _count, uint8_t contractAddress[20], uint8_t transaction[204]);
-void BidderEncrypt(uint8_t* sgxPublicKey, BID* bid);
+void EnclaveStart(sgx_sealed_data_t* sealed, size_t sealedSize, size_t* sealedLen, uint8_t address[20], uint8_t dhPublicKey[32]);
+void EnclaveGetAuctionWinner(sgx_sealed_data_t* sealed, size_t sealedLen, uint8_t* cipher, size_t cipherLen, uint8_t contractAddress[20], uint8_t* transaction, size_t transactionSize, size_t* transactionLen);
 
 sgx_status_t SGX_CDECL ocall_mbedtls_net_connect(int* retval, mbedtls_net_context* ctx, const char* host, const char* port, int proto);
 sgx_status_t SGX_CDECL ocall_mbedtls_net_bind(int* retval, mbedtls_net_context* ctx, const char* bind_ip, const char* port, int proto);

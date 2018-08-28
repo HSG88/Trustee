@@ -24,13 +24,7 @@
     <ClCompile Include="Enclave.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="debug.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="keccak.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Log.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -38,13 +32,7 @@
     <ClInclude Include="Enclave_t.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="debug.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="keccak.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Enclave.h">

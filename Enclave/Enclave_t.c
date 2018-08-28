@@ -19,30 +19,23 @@
 
 
 typedef struct ms_EnclaveStart_t {
-	int ms_retval;
 	sgx_sealed_data_t* ms_sealed;
-	size_t* ms_len;
-	uint8_t* ms_contractPublicKey;
+	size_t ms_sealedSize;
+	size_t* ms_sealedLen;
 	uint8_t* ms_address;
-	uint8_t* ms_encryptPublicKey;
+	uint8_t* ms_dhPublicKey;
 } ms_EnclaveStart_t;
 
-typedef struct ms_EnclaveUnsealPrivateKeys_t {
-	int ms_retval;
+typedef struct ms_EnclaveGetAuctionWinner_t {
 	sgx_sealed_data_t* ms_sealed;
-} ms_EnclaveUnsealPrivateKeys_t;
-
-typedef struct ms_EnclaveAuctionWinner_t {
-	BID* ms_bids;
-	size_t ms__count;
+	size_t ms_sealedLen;
+	uint8_t* ms_cipher;
+	size_t ms_cipherLen;
 	uint8_t* ms_contractAddress;
 	uint8_t* ms_transaction;
-} ms_EnclaveAuctionWinner_t;
-
-typedef struct ms_BidderEncrypt_t {
-	uint8_t* ms_sgxPublicKey;
-	BID* ms_bid;
-} ms_BidderEncrypt_t;
+	size_t ms_transactionSize;
+	size_t* ms_transactionLen;
+} ms_EnclaveGetAuctionWinner_t;
 
 typedef struct ms_ocall_mbedtls_net_connect_t {
 	int ms_retval;
@@ -130,26 +123,23 @@ static sgx_status_t SGX_CDECL sgx_EnclaveStart(void* pms)
 	ms_EnclaveStart_t* ms = SGX_CAST(ms_EnclaveStart_t*, pms);
 	sgx_status_t status = SGX_SUCCESS;
 	sgx_sealed_data_t* _tmp_sealed = ms->ms_sealed;
-	size_t _len_sealed = 624;
+	size_t _tmp_sealedSize = ms->ms_sealedSize;
+	size_t _len_sealed = _tmp_sealedSize;
 	sgx_sealed_data_t* _in_sealed = NULL;
-	size_t* _tmp_len = ms->ms_len;
-	size_t _len_len = sizeof(*_tmp_len);
-	size_t* _in_len = NULL;
-	uint8_t* _tmp_contractPublicKey = ms->ms_contractPublicKey;
-	size_t _len_contractPublicKey = 64 * sizeof(*_tmp_contractPublicKey);
-	uint8_t* _in_contractPublicKey = NULL;
+	size_t* _tmp_sealedLen = ms->ms_sealedLen;
+	size_t _len_sealedLen = sizeof(*_tmp_sealedLen);
+	size_t* _in_sealedLen = NULL;
 	uint8_t* _tmp_address = ms->ms_address;
 	size_t _len_address = 20 * sizeof(*_tmp_address);
 	uint8_t* _in_address = NULL;
-	uint8_t* _tmp_encryptPublicKey = ms->ms_encryptPublicKey;
-	size_t _len_encryptPublicKey = 32 * sizeof(*_tmp_encryptPublicKey);
-	uint8_t* _in_encryptPublicKey = NULL;
+	uint8_t* _tmp_dhPublicKey = ms->ms_dhPublicKey;
+	size_t _len_dhPublicKey = 32 * sizeof(*_tmp_dhPublicKey);
+	uint8_t* _in_dhPublicKey = NULL;
 
 	CHECK_UNIQUE_POINTER(_tmp_sealed, _len_sealed);
-	CHECK_UNIQUE_POINTER(_tmp_len, _len_len);
-	CHECK_UNIQUE_POINTER(_tmp_contractPublicKey, _len_contractPublicKey);
+	CHECK_UNIQUE_POINTER(_tmp_sealedLen, _len_sealedLen);
 	CHECK_UNIQUE_POINTER(_tmp_address, _len_address);
-	CHECK_UNIQUE_POINTER(_tmp_encryptPublicKey, _len_encryptPublicKey);
+	CHECK_UNIQUE_POINTER(_tmp_dhPublicKey, _len_dhPublicKey);
 
 	//
 	// fence after pointer checks
@@ -164,21 +154,13 @@ static sgx_status_t SGX_CDECL sgx_EnclaveStart(void* pms)
 
 		memset((void*)_in_sealed, 0, _len_sealed);
 	}
-	if (_tmp_len != NULL && _len_len != 0) {
-		if ((_in_len = (size_t*)malloc(_len_len)) == NULL) {
+	if (_tmp_sealedLen != NULL && _len_sealedLen != 0) {
+		if ((_in_sealedLen = (size_t*)malloc(_len_sealedLen)) == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
 			goto err;
 		}
 
-		memset((void*)_in_len, 0, _len_len);
-	}
-	if (_tmp_contractPublicKey != NULL && _len_contractPublicKey != 0) {
-		if ((_in_contractPublicKey = (uint8_t*)malloc(_len_contractPublicKey)) == NULL) {
-			status = SGX_ERROR_OUT_OF_MEMORY;
-			goto err;
-		}
-
-		memset((void*)_in_contractPublicKey, 0, _len_contractPublicKey);
+		memset((void*)_in_sealedLen, 0, _len_sealedLen);
 	}
 	if (_tmp_address != NULL && _len_address != 0) {
 		if ((_in_address = (uint8_t*)malloc(_len_address)) == NULL) {
@@ -188,55 +170,70 @@ static sgx_status_t SGX_CDECL sgx_EnclaveStart(void* pms)
 
 		memset((void*)_in_address, 0, _len_address);
 	}
-	if (_tmp_encryptPublicKey != NULL && _len_encryptPublicKey != 0) {
-		if ((_in_encryptPublicKey = (uint8_t*)malloc(_len_encryptPublicKey)) == NULL) {
+	if (_tmp_dhPublicKey != NULL && _len_dhPublicKey != 0) {
+		if ((_in_dhPublicKey = (uint8_t*)malloc(_len_dhPublicKey)) == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
 			goto err;
 		}
 
-		memset((void*)_in_encryptPublicKey, 0, _len_encryptPublicKey);
+		memset((void*)_in_dhPublicKey, 0, _len_dhPublicKey);
 	}
 
-	ms->ms_retval = EnclaveStart(_in_sealed, _in_len, _in_contractPublicKey, _in_address, _in_encryptPublicKey);
+	EnclaveStart(_in_sealed, _tmp_sealedSize, _in_sealedLen, _in_address, _in_dhPublicKey);
 err:
 	if (_in_sealed) {
 		memcpy(_tmp_sealed, _in_sealed, _len_sealed);
 		free(_in_sealed);
 	}
-	if (_in_len) {
-		memcpy(_tmp_len, _in_len, _len_len);
-		free(_in_len);
-	}
-	if (_in_contractPublicKey) {
-		memcpy(_tmp_contractPublicKey, _in_contractPublicKey, _len_contractPublicKey);
-		free(_in_contractPublicKey);
+	if (_in_sealedLen) {
+		memcpy(_tmp_sealedLen, _in_sealedLen, _len_sealedLen);
+		free(_in_sealedLen);
 	}
 	if (_in_address) {
 		memcpy(_tmp_address, _in_address, _len_address);
 		free(_in_address);
 	}
-	if (_in_encryptPublicKey) {
-		memcpy(_tmp_encryptPublicKey, _in_encryptPublicKey, _len_encryptPublicKey);
-		free(_in_encryptPublicKey);
+	if (_in_dhPublicKey) {
+		memcpy(_tmp_dhPublicKey, _in_dhPublicKey, _len_dhPublicKey);
+		free(_in_dhPublicKey);
 	}
 
 	return status;
 }
 
-static sgx_status_t SGX_CDECL sgx_EnclaveUnsealPrivateKeys(void* pms)
+static sgx_status_t SGX_CDECL sgx_EnclaveGetAuctionWinner(void* pms)
 {
-	CHECK_REF_POINTER(pms, sizeof(ms_EnclaveUnsealPrivateKeys_t));
+	CHECK_REF_POINTER(pms, sizeof(ms_EnclaveGetAuctionWinner_t));
 	//
 	// fence after pointer checks
 	//
 	sgx_lfence();
-	ms_EnclaveUnsealPrivateKeys_t* ms = SGX_CAST(ms_EnclaveUnsealPrivateKeys_t*, pms);
+	ms_EnclaveGetAuctionWinner_t* ms = SGX_CAST(ms_EnclaveGetAuctionWinner_t*, pms);
 	sgx_status_t status = SGX_SUCCESS;
 	sgx_sealed_data_t* _tmp_sealed = ms->ms_sealed;
-	size_t _len_sealed = 624;
+	size_t _tmp_sealedLen = ms->ms_sealedLen;
+	size_t _len_sealed = _tmp_sealedLen;
 	sgx_sealed_data_t* _in_sealed = NULL;
+	uint8_t* _tmp_cipher = ms->ms_cipher;
+	size_t _tmp_cipherLen = ms->ms_cipherLen;
+	size_t _len_cipher = _tmp_cipherLen;
+	uint8_t* _in_cipher = NULL;
+	uint8_t* _tmp_contractAddress = ms->ms_contractAddress;
+	size_t _len_contractAddress = 20 * sizeof(*_tmp_contractAddress);
+	uint8_t* _in_contractAddress = NULL;
+	uint8_t* _tmp_transaction = ms->ms_transaction;
+	size_t _tmp_transactionSize = ms->ms_transactionSize;
+	size_t _len_transaction = _tmp_transactionSize;
+	uint8_t* _in_transaction = NULL;
+	size_t* _tmp_transactionLen = ms->ms_transactionLen;
+	size_t _len_transactionLen = sizeof(*_tmp_transactionLen);
+	size_t* _in_transactionLen = NULL;
 
 	CHECK_UNIQUE_POINTER(_tmp_sealed, _len_sealed);
+	CHECK_UNIQUE_POINTER(_tmp_cipher, _len_cipher);
+	CHECK_UNIQUE_POINTER(_tmp_contractAddress, _len_contractAddress);
+	CHECK_UNIQUE_POINTER(_tmp_transaction, _len_transaction);
+	CHECK_UNIQUE_POINTER(_tmp_transactionLen, _len_transactionLen);
 
 	//
 	// fence after pointer checks
@@ -252,56 +249,14 @@ static sgx_status_t SGX_CDECL sgx_EnclaveUnsealPrivateKeys(void* pms)
 
 		memcpy(_in_sealed, _tmp_sealed, _len_sealed);
 	}
-
-	ms->ms_retval = EnclaveUnsealPrivateKeys(_in_sealed);
-err:
-	if (_in_sealed) free(_in_sealed);
-
-	return status;
-}
-
-static sgx_status_t SGX_CDECL sgx_EnclaveAuctionWinner(void* pms)
-{
-	CHECK_REF_POINTER(pms, sizeof(ms_EnclaveAuctionWinner_t));
-	//
-	// fence after pointer checks
-	//
-	sgx_lfence();
-	ms_EnclaveAuctionWinner_t* ms = SGX_CAST(ms_EnclaveAuctionWinner_t*, pms);
-	sgx_status_t status = SGX_SUCCESS;
-	BID* _tmp_bids = ms->ms_bids;
-	size_t _tmp__count = ms->ms__count;
-	size_t _len_bids = _tmp__count * sizeof(*_tmp_bids);
-	BID* _in_bids = NULL;
-	uint8_t* _tmp_contractAddress = ms->ms_contractAddress;
-	size_t _len_contractAddress = 20 * sizeof(*_tmp_contractAddress);
-	uint8_t* _in_contractAddress = NULL;
-	uint8_t* _tmp_transaction = ms->ms_transaction;
-	size_t _len_transaction = 204 * sizeof(*_tmp_transaction);
-	uint8_t* _in_transaction = NULL;
-
-	if (sizeof(*_tmp_bids) != 0 &&
-		(size_t)_tmp__count > (SIZE_MAX / sizeof(*_tmp_bids))) {
-		return SGX_ERROR_INVALID_PARAMETER;
-	}
-
-	CHECK_UNIQUE_POINTER(_tmp_bids, _len_bids);
-	CHECK_UNIQUE_POINTER(_tmp_contractAddress, _len_contractAddress);
-	CHECK_UNIQUE_POINTER(_tmp_transaction, _len_transaction);
-
-	//
-	// fence after pointer checks
-	//
-	sgx_lfence();
-
-	if (_tmp_bids != NULL && _len_bids != 0) {
-		_in_bids = (BID*)malloc(_len_bids);
-		if (_in_bids == NULL) {
+	if (_tmp_cipher != NULL && _len_cipher != 0) {
+		_in_cipher = (uint8_t*)malloc(_len_cipher);
+		if (_in_cipher == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
 			goto err;
 		}
 
-		memcpy(_in_bids, _tmp_bids, _len_bids);
+		memcpy(_in_cipher, _tmp_cipher, _len_cipher);
 	}
 	if (_tmp_contractAddress != NULL && _len_contractAddress != 0) {
 		_in_contractAddress = (uint8_t*)malloc(_len_contractAddress);
@@ -320,67 +275,27 @@ static sgx_status_t SGX_CDECL sgx_EnclaveAuctionWinner(void* pms)
 
 		memset((void*)_in_transaction, 0, _len_transaction);
 	}
+	if (_tmp_transactionLen != NULL && _len_transactionLen != 0) {
+		if ((_in_transactionLen = (size_t*)malloc(_len_transactionLen)) == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
 
-	EnclaveAuctionWinner(_in_bids, _tmp__count, _in_contractAddress, _in_transaction);
+		memset((void*)_in_transactionLen, 0, _len_transactionLen);
+	}
+
+	EnclaveGetAuctionWinner(_in_sealed, _tmp_sealedLen, _in_cipher, _tmp_cipherLen, _in_contractAddress, _in_transaction, _tmp_transactionSize, _in_transactionLen);
 err:
-	if (_in_bids) free(_in_bids);
+	if (_in_sealed) free(_in_sealed);
+	if (_in_cipher) free(_in_cipher);
 	if (_in_contractAddress) free(_in_contractAddress);
 	if (_in_transaction) {
 		memcpy(_tmp_transaction, _in_transaction, _len_transaction);
 		free(_in_transaction);
 	}
-
-	return status;
-}
-
-static sgx_status_t SGX_CDECL sgx_BidderEncrypt(void* pms)
-{
-	CHECK_REF_POINTER(pms, sizeof(ms_BidderEncrypt_t));
-	//
-	// fence after pointer checks
-	//
-	sgx_lfence();
-	ms_BidderEncrypt_t* ms = SGX_CAST(ms_BidderEncrypt_t*, pms);
-	sgx_status_t status = SGX_SUCCESS;
-	uint8_t* _tmp_sgxPublicKey = ms->ms_sgxPublicKey;
-	size_t _len_sgxPublicKey = 32;
-	uint8_t* _in_sgxPublicKey = NULL;
-	BID* _tmp_bid = ms->ms_bid;
-	size_t _len_bid = 64;
-	BID* _in_bid = NULL;
-
-	CHECK_UNIQUE_POINTER(_tmp_sgxPublicKey, _len_sgxPublicKey);
-	CHECK_UNIQUE_POINTER(_tmp_bid, _len_bid);
-
-	//
-	// fence after pointer checks
-	//
-	sgx_lfence();
-
-	if (_tmp_sgxPublicKey != NULL && _len_sgxPublicKey != 0) {
-		_in_sgxPublicKey = (uint8_t*)malloc(_len_sgxPublicKey);
-		if (_in_sgxPublicKey == NULL) {
-			status = SGX_ERROR_OUT_OF_MEMORY;
-			goto err;
-		}
-
-		memcpy(_in_sgxPublicKey, _tmp_sgxPublicKey, _len_sgxPublicKey);
-	}
-	if (_tmp_bid != NULL && _len_bid != 0) {
-		if ((_in_bid = (BID*)malloc(_len_bid)) == NULL) {
-			status = SGX_ERROR_OUT_OF_MEMORY;
-			goto err;
-		}
-
-		memset((void*)_in_bid, 0, _len_bid);
-	}
-
-	BidderEncrypt(_in_sgxPublicKey, _in_bid);
-err:
-	if (_in_sgxPublicKey) free(_in_sgxPublicKey);
-	if (_in_bid) {
-		memcpy(_tmp_bid, _in_bid, _len_bid);
-		free(_in_bid);
+	if (_in_transactionLen) {
+		memcpy(_tmp_transactionLen, _in_transactionLen, _len_transactionLen);
+		free(_in_transactionLen);
 	}
 
 	return status;
@@ -388,34 +303,32 @@ err:
 
 SGX_EXTERNC const struct {
 	size_t nr_ecall;
-	struct {void* call_addr; uint8_t is_priv;} ecall_table[4];
+	struct {void* call_addr; uint8_t is_priv;} ecall_table[2];
 } g_ecall_table = {
-	4,
+	2,
 	{
 		{(void*)(uintptr_t)sgx_EnclaveStart, 0},
-		{(void*)(uintptr_t)sgx_EnclaveUnsealPrivateKeys, 0},
-		{(void*)(uintptr_t)sgx_EnclaveAuctionWinner, 0},
-		{(void*)(uintptr_t)sgx_BidderEncrypt, 0},
+		{(void*)(uintptr_t)sgx_EnclaveGetAuctionWinner, 0},
 	}
 };
 
 SGX_EXTERNC const struct {
 	size_t nr_ocall;
-	uint8_t entry_table[11][4];
+	uint8_t entry_table[11][2];
 } g_dyn_entry_table = {
 	11,
 	{
-		{0, 0, 0, 0, },
-		{0, 0, 0, 0, },
-		{0, 0, 0, 0, },
-		{0, 0, 0, 0, },
-		{0, 0, 0, 0, },
-		{0, 0, 0, 0, },
-		{0, 0, 0, 0, },
-		{0, 0, 0, 0, },
-		{0, 0, 0, 0, },
-		{0, 0, 0, 0, },
-		{0, 0, 0, 0, },
+		{0, 0, },
+		{0, 0, },
+		{0, 0, },
+		{0, 0, },
+		{0, 0, },
+		{0, 0, },
+		{0, 0, },
+		{0, 0, },
+		{0, 0, },
+		{0, 0, },
+		{0, 0, },
 	}
 };
 

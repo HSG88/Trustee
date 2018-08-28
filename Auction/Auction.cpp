@@ -3,9 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-
 # include <Shlobj.h>
-
 #include "sgx_urts.h"
 #include "sgx_uae_service.h"
 #include "Auction.h"
@@ -46,7 +44,7 @@ void BinaryToHex(uint8_t* input, uint8_t* output, size_t size)
 
 void Dump(char* title, uint8_t *input, size_t size)
 {
-	printf("%s\n", title);
+	printf("%s: ", title);
 	for (int i = 0; i < size; i++)
 		printf("%02X", input[i]);
 	printf("\n");
@@ -115,64 +113,51 @@ int initialize_enclave(void)
 	return 0;
 }
 
-
-void SaveData()
+void StartSGX()
 {
-	HANDLE hFile = CreateFile("data", GENERIC_WRITE, NULL, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	sgx_sealed_data_t* sealed = (sgx_sealed_data_t*)malloc(624);
-	size_t len;
-	int ret;
-	DWORD length;
-	unsigned char pubKey[64] = { 0 }, address[20] = { 0 }, dhPublicKey[32];
-	EnclaveStart(global_eid, &ret, sealed, &len, pubKey, address, dhPublicKey);
-	BID bids[10];
-	for (int i = 0; i < 10; i++)
-	{
-		BidderEncrypt(global_eid, dhPublicKey, &bids[i]);
-		WriteFile(hFile, bids[i].publicKey, 32, &length, NULL);
-		WriteFile(hFile, bids[i].cipher, 32, &length, NULL);
-	}
-	WriteFile(hFile, (unsigned char*)sealed, 624, &length, NULL);
-	WriteFile(hFile, pubKey, 64, &length, NULL);
-	WriteFile(hFile, address, 20, &length, NULL);
-	WriteFile(hFile, dhPublicKey, sizeof(dhPublicKey), &length, NULL);
+	HANDLE hFile = CreateFile("sealedData", GENERIC_WRITE, NULL, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	size_t sealedLen = 1024;
+	DWORD tmpLen;
+	sgx_sealed_data_t* sealed = (sgx_sealed_data_t*)malloc(sealedLen);
+	uint8_t sgxAddress[20] = { 0 }, dhPublicKey[32];
+	EnclaveStart(global_eid,sealed, sealedLen, &sealedLen, sgxAddress, dhPublicKey);
+	WriteFile(hFile, (uint8_t*)&sealedLen, sizeof(size_t), &tmpLen, NULL);
+	WriteFile(hFile, (uint8_t*)sealed, sealedLen, &tmpLen, NULL);
+	WriteFile(hFile, sgxAddress, sizeof(sgxAddress), &tmpLen, NULL);
+	WriteFile(hFile, dhPublicKey, sizeof(dhPublicKey), &tmpLen, NULL);
+	CloseHandle(hFile);
+	Dump("SGX Address: ", sgxAddress, sizeof(sgxAddress));
+	Dump("SGX ECDH Public Key: ", dhPublicKey, sizeof(dhPublicKey));
+}
+
+void GetAuctionWinner()
+{
+	//read sealed Data
+	HANDLE hFile = CreateFile("sealedData", GENERIC_READ, NULL, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	size_t sealedLen;
+	DWORD tmpLen;
+	ReadFile(hFile, (uint8_t*)&sealedLen, sizeof(size_t), &tmpLen, NULL);
+	sgx_sealed_data_t* sealed = (sgx_sealed_data_t*)malloc(sealedLen);
+	ReadFile(hFile, (uint8_t*)sealed, sealedLen, &tmpLen, NULL);
+	CloseHandle(hFile);
+	//read contract address and bids ciphertext
+	hFile = CreateFile("bids", GENERIC_READ, NULL, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	uint8_t contractAddress[20], *cipher;
+	uint32_t cipherLen;
+	ReadFile(hFile, contractAddress, sizeof(contractAddress), &tmpLen, NULL);
+	ReadFile(hFile, (uint8_t*)&cipherLen, sizeof(cipherLen), &tmpLen, NULL);
+	cipher = (uint8_t*)malloc(cipherLen);
+	ReadFile(hFile, cipher, cipherLen, &tmpLen, NULL);
+	CloseHandle(hFile);
+	//submit data to SGX and get raw transaction
+	size_t transactionLen = 512;
+	uint8_t* transaction = (uint8_t*)malloc(transactionLen);
+	EnclaveGetAuctionWinner(global_eid, sealed, sealedLen, cipher, cipherLen, contractAddress, transaction, transactionLen, &transactionLen);
+	hFile = CreateFile("transaction", GENERIC_WRITE, NULL, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	WriteFile(hFile, transaction, transactionLen, &tmpLen, NULL);
 	CloseHandle(hFile);
 }
-void LoadData()
-{
-	HANDLE hFile = CreateFile("data", GENERIC_READ, NULL, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	sgx_sealed_data_t* sealed = (sgx_sealed_data_t*)malloc(624);
-	size_t len;
-	int ret;
-	DWORD length;
-	BID bids[10];
-	unsigned char pubKey[64] = { 0 }, address[20] = { 0 }, dhPublicKey[32];
-	for (int i = 0; i < 10; i++)
-	{
-		ReadFile(hFile, bids[i].publicKey, 32, &length, NULL);
-		ReadFile(hFile, bids[i].cipher, 32, &length, NULL);
-	}
-	ReadFile(hFile, (unsigned char*)sealed, 624, &length, NULL);
-	ReadFile(hFile, pubKey, 64, &length, NULL);
-	ReadFile(hFile, address, 20, &length, NULL);
-	ReadFile(hFile, dhPublicKey, sizeof(dhPublicKey), &length, NULL);
-	CloseHandle(hFile);
-	Dump("SGX_ADDRESS", address, 20);
-	Dump("Public DH Key", dhPublicKey, 32);
 
-	
-
-	EnclaveUnsealPrivateKeys(global_eid, &ret, sealed);
-	BidderEncrypt(global_eid, dhPublicKey, &bids[9]);
-	printf("Enter contract address:\n");
-	char tmpAddress[41];
-	fgets(tmpAddress, sizeof(tmpAddress), stdin);
-	uint8_t contractAddress[20], transaction[204];
-	HexToBinary((uint8_t*)tmpAddress, contractAddress, 20);
-	EnclaveAuctionWinner(global_eid, bids, 10, contractAddress, transaction);
-	Dump("Transaction", transaction,204);
-	
-}
 
 
 /* Application entry */
@@ -189,9 +174,9 @@ int SGX_CDECL main(int argc, char *argv[])
 	}
 	
 	/* Utilize SGX trusted calls*/
-	//SaveData();
-	LoadData();
-
+	
+	
+	StartSGX();
 	/* Destroy the enclave */
 	sgx_destroy_enclave(global_eid);
 

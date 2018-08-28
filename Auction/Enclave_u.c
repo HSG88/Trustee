@@ -2,30 +2,23 @@
 #include <errno.h>
 
 typedef struct ms_EnclaveStart_t {
-	int ms_retval;
 	sgx_sealed_data_t* ms_sealed;
-	size_t* ms_len;
-	uint8_t* ms_contractPublicKey;
+	size_t ms_sealedSize;
+	size_t* ms_sealedLen;
 	uint8_t* ms_address;
-	uint8_t* ms_encryptPublicKey;
+	uint8_t* ms_dhPublicKey;
 } ms_EnclaveStart_t;
 
-typedef struct ms_EnclaveUnsealPrivateKeys_t {
-	int ms_retval;
+typedef struct ms_EnclaveGetAuctionWinner_t {
 	sgx_sealed_data_t* ms_sealed;
-} ms_EnclaveUnsealPrivateKeys_t;
-
-typedef struct ms_EnclaveAuctionWinner_t {
-	BID* ms_bids;
-	size_t ms__count;
+	size_t ms_sealedLen;
+	uint8_t* ms_cipher;
+	size_t ms_cipherLen;
 	uint8_t* ms_contractAddress;
 	uint8_t* ms_transaction;
-} ms_EnclaveAuctionWinner_t;
-
-typedef struct ms_BidderEncrypt_t {
-	uint8_t* ms_sgxPublicKey;
-	BID* ms_bid;
-} ms_BidderEncrypt_t;
+	size_t ms_transactionSize;
+	size_t* ms_transactionLen;
+} ms_EnclaveGetAuctionWinner_t;
 
 typedef struct ms_ocall_mbedtls_net_connect_t {
 	int ms_retval;
@@ -205,49 +198,32 @@ static const struct {
 	}
 };
 
-sgx_status_t EnclaveStart(sgx_enclave_id_t eid, int* retval, sgx_sealed_data_t* sealed, size_t* len, uint8_t contractPublicKey[64], uint8_t address[20], uint8_t encryptPublicKey[32])
+sgx_status_t EnclaveStart(sgx_enclave_id_t eid, sgx_sealed_data_t* sealed, size_t sealedSize, size_t* sealedLen, uint8_t address[20], uint8_t dhPublicKey[32])
 {
 	sgx_status_t status;
 	ms_EnclaveStart_t ms;
 	ms.ms_sealed = sealed;
-	ms.ms_len = len;
-	ms.ms_contractPublicKey = (uint8_t*)contractPublicKey;
+	ms.ms_sealedSize = sealedSize;
+	ms.ms_sealedLen = sealedLen;
 	ms.ms_address = (uint8_t*)address;
-	ms.ms_encryptPublicKey = (uint8_t*)encryptPublicKey;
+	ms.ms_dhPublicKey = (uint8_t*)dhPublicKey;
 	status = sgx_ecall(eid, 0, &ocall_table_Enclave, &ms);
-	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
 
-sgx_status_t EnclaveUnsealPrivateKeys(sgx_enclave_id_t eid, int* retval, sgx_sealed_data_t* sealed)
+sgx_status_t EnclaveGetAuctionWinner(sgx_enclave_id_t eid, sgx_sealed_data_t* sealed, size_t sealedLen, uint8_t* cipher, size_t cipherLen, uint8_t contractAddress[20], uint8_t* transaction, size_t transactionSize, size_t* transactionLen)
 {
 	sgx_status_t status;
-	ms_EnclaveUnsealPrivateKeys_t ms;
+	ms_EnclaveGetAuctionWinner_t ms;
 	ms.ms_sealed = sealed;
-	status = sgx_ecall(eid, 1, &ocall_table_Enclave, &ms);
-	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
-	return status;
-}
-
-sgx_status_t EnclaveAuctionWinner(sgx_enclave_id_t eid, BID* bids, size_t _count, uint8_t contractAddress[20], uint8_t transaction[204])
-{
-	sgx_status_t status;
-	ms_EnclaveAuctionWinner_t ms;
-	ms.ms_bids = bids;
-	ms.ms__count = _count;
+	ms.ms_sealedLen = sealedLen;
+	ms.ms_cipher = cipher;
+	ms.ms_cipherLen = cipherLen;
 	ms.ms_contractAddress = (uint8_t*)contractAddress;
-	ms.ms_transaction = (uint8_t*)transaction;
-	status = sgx_ecall(eid, 2, &ocall_table_Enclave, &ms);
-	return status;
-}
-
-sgx_status_t BidderEncrypt(sgx_enclave_id_t eid, uint8_t* sgxPublicKey, BID* bid)
-{
-	sgx_status_t status;
-	ms_BidderEncrypt_t ms;
-	ms.ms_sgxPublicKey = sgxPublicKey;
-	ms.ms_bid = bid;
-	status = sgx_ecall(eid, 3, &ocall_table_Enclave, &ms);
+	ms.ms_transaction = transaction;
+	ms.ms_transactionSize = transactionSize;
+	ms.ms_transactionLen = transactionLen;
+	status = sgx_ecall(eid, 1, &ocall_table_Enclave, &ms);
 	return status;
 }
 
