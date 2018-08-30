@@ -4,15 +4,15 @@ extern "C"
 {
 	__declspec(dllimport) bool CreateEnclave();
 	__declspec(dllimport) void DestroyEnclave();
-	__declspec(dllimport) int GenerateKeys(unsigned char sealed[1024], unsigned char sgxAddress[20], unsigned char dhPublicKey[32]);
+	__declspec(dllimport) int GenerateKeys(unsigned char sealed[2048], unsigned char sgxAddress[20], unsigned char dhPublicKey[32]);
 	__declspec(dllimport) int GetAuctionWinner(unsigned char* sealed, unsigned int sealedLen, unsigned char* cipher, unsigned int cipherLen, unsigned char contractAddress[20], unsigned char transaction[512]);
 };
 public ref class ManagedEnclave
 {
 	
 public:
-	ManagedEnclave() {
-		CreateEnclave();
+	ManagedEnclave(bool% success) {
+		success = CreateEnclave();
 	}
 	~ManagedEnclave()
 	{
