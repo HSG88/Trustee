@@ -33,7 +33,6 @@ typedef struct ms_EnclaveGetAuctionWinner_t {
 	size_t ms_cipherLen;
 	uint8_t* ms_contractAddress;
 	uint8_t* ms_transaction;
-	size_t ms_transactionSize;
 	size_t* ms_transactionLen;
 } ms_EnclaveGetAuctionWinner_t;
 
@@ -222,8 +221,7 @@ static sgx_status_t SGX_CDECL sgx_EnclaveGetAuctionWinner(void* pms)
 	size_t _len_contractAddress = 20 * sizeof(*_tmp_contractAddress);
 	uint8_t* _in_contractAddress = NULL;
 	uint8_t* _tmp_transaction = ms->ms_transaction;
-	size_t _tmp_transactionSize = ms->ms_transactionSize;
-	size_t _len_transaction = _tmp_transactionSize;
+	size_t _len_transaction = 512 * sizeof(*_tmp_transaction);
 	uint8_t* _in_transaction = NULL;
 	size_t* _tmp_transactionLen = ms->ms_transactionLen;
 	size_t _len_transactionLen = sizeof(*_tmp_transactionLen);
@@ -284,7 +282,7 @@ static sgx_status_t SGX_CDECL sgx_EnclaveGetAuctionWinner(void* pms)
 		memset((void*)_in_transactionLen, 0, _len_transactionLen);
 	}
 
-	EnclaveGetAuctionWinner(_in_sealed, _tmp_sealedLen, _in_cipher, _tmp_cipherLen, _in_contractAddress, _in_transaction, _tmp_transactionSize, _in_transactionLen);
+	EnclaveGetAuctionWinner(_in_sealed, _tmp_sealedLen, _in_cipher, _tmp_cipherLen, _in_contractAddress, _in_transaction, _in_transactionLen);
 err:
 	if (_in_sealed) free(_in_sealed);
 	if (_in_cipher) free(_in_cipher);

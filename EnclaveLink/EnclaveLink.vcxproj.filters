@@ -18,11 +18,20 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="EnclaveLink.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
     <ClInclude Include="Enclave_u.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="mbedtls_u.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EnclaveLink.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Enclave_u.c">
       <Filter>Generated Files</Filter>
     </ClCompile>

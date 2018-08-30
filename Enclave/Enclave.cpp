@@ -41,7 +41,7 @@ void Sign(mbedtls_ecdsa_context& ctxDSA, const uint8_t *data, size_t in_len, uin
 	mbedtls_mpi_free(&r);
 	mbedtls_mpi_free(&s);
 }
-void CreateTransaction(mbedtls_ecdsa_context& ctxDSA, uint8_t contractAddress[20], uint8_t inputHash[32], uint16_t winnerIndex, uint32_t winnerBid, uint8_t* transaction,size_t transactionSize, size_t* transactionLen)
+void CreateTransaction(mbedtls_ecdsa_context& ctxDSA, uint8_t contractAddress[20], uint8_t inputHash[32], uint16_t winnerIndex, uint32_t winnerBid, uint8_t transaction[512], size_t* transactionLen)
 {
 	std::vector<uint8_t> tx;
 	//empty nonce = 80
@@ -96,11 +96,6 @@ void CreateTransaction(mbedtls_ecdsa_context& ctxDSA, uint8_t contractAddress[20
 	for (int i = 0; i < sizeof(s); i++)
 		tx.push_back(s[i]);
 	tx[1]= tx.size()-2;
-	if (tx.size() > transactionSize)
-	{
-		*transactionLen = 0;
-		return;
-	}
 	*transactionLen = tx.size();
 	std::copy(tx.begin(), tx.end(), transaction);
 }
@@ -126,17 +121,17 @@ bool RecoverContexts(sgx_sealed_data_t *sealed, size_t sealedLen, mbedtls_ecdh_c
 	mbedtls_ecp_mul(&ctxDSA.grp, &ctxDSA.Q, &ctxDSA.d, &ctxDSA.grp.G, NULL, NULL);
 	return true;
 }
-void GetWinner(mbedtls_ecdh_context& ctxDH, uint8_t* cipher, size_t cipherLen, uint32_t& winnerBid, uint16_t& winnerIndex)
+void GetWinner(mbedtls_ecdh_context& ctxDH, uint8_t* cipher, size_t cipherLen, uint32_t* winnerBid, uint16_t* winnerIndex)
 {
 	uint32_t temp;
 	int count = cipherLen / 64;
 	for (int i = 0; i < count; i++)
 	{
 		temp = Decrypt(ctxDH, cipher + i * 64);
-		if (temp > winnerBid)
+		if (temp > *winnerBid)
 		{
-			winnerBid = temp;
-			winnerIndex = i;
+			*winnerBid = temp;
+			*winnerIndex = i;
 		}
 	}
 }
@@ -146,6 +141,8 @@ void EnclaveStart(sgx_sealed_data_t *sealed, size_t sealedSize, size_t* sealedLe
 	mbedtls_ecdsa_context ctxDSA;
 	mbedtls_ecdh_context ctxDH;
 	uint8_t secret[64], tmpDHPublicKey[32], tmpDSAPublicKey[65], tmpSGXAddress[32];
+	char buff[100];
+	size_t tmpLen;
 
 	//init DH key-pair
 	mbedtls_ecdh_init(&ctxDH);
@@ -153,6 +150,8 @@ void EnclaveStart(sgx_sealed_data_t *sealed, size_t sealedSize, size_t* sealedLe
 	mbedtls_ecdh_gen_public(&ctxDH.grp, &ctxDH.d, &ctxDH.Q, mbedtls_sgx_drbg_random, NULL);
 	mbedtls_mpi_write_binary(&ctxDH.d, secret, 32);
 	mbedtls_mpi_write_binary(&ctxDH.Q.X, tmpDHPublicKey, sizeof(tmpDHPublicKey));
+	mbedtls_mpi_write_string(&ctxDH.d, 16, buff, 100, &tmpLen);
+	printf_sgx("DH Prv: %s\n", buff);
 
 	//init DSA key-pair
 	mbedtls_ecdsa_init(&ctxDSA);
@@ -178,13 +177,12 @@ void EnclaveStart(sgx_sealed_data_t *sealed, size_t sealedSize, size_t* sealedLe
 	mbedtls_ecdh_free(&ctxDH);
 	free(sealedBuffer);
 }
-
-void EnclaveGetAuctionWinner(sgx_sealed_data_t *sealed, size_t sealedLen, uint8_t* cipher, size_t cipherLen, uint8_t contractAddress[20], uint8_t* transaction,size_t transactionSize, size_t* transactionLen)
+void EnclaveGetAuctionWinner(sgx_sealed_data_t *sealed, size_t sealedLen, uint8_t* cipher, size_t cipherLen, uint8_t contractAddress[20], uint8_t transaction[512], size_t* transactionLen)
 {
 	mbedtls_ecdh_context ctxDH;
 	mbedtls_ecdsa_context ctxDSA;
-	uint32_t winnerBid;
-	uint16_t winnerIndex;
+	uint32_t winnerBid=0;
+	uint16_t winnerIndex=0;
 	uint8_t inputHash[32];
 
 	if (!RecoverContexts(sealed, sealedLen, ctxDH, ctxDSA))
@@ -192,10 +190,10 @@ void EnclaveGetAuctionWinner(sgx_sealed_data_t *sealed, size_t sealedLen, uint8_
 		*transactionLen = 0;
 		return;
 	}
-	GetWinner(ctxDH, cipher, cipherLen, winnerBid, winnerIndex);
+	GetWinner(ctxDH, cipher, cipherLen, &winnerBid, &winnerIndex);
 	keccak(cipher, cipherLen, inputHash, 32);
-	CreateTransaction(ctxDSA, contractAddress, inputHash, winnerIndex, winnerBid, transaction, transactionSize, transactionLen);
-
+	CreateTransaction(ctxDSA, contractAddress, inputHash, winnerIndex, winnerBid, transaction, transactionLen);
+	
 	mbedtls_ecdh_free(&ctxDH);
 	mbedtls_ecdsa_free(&ctxDSA);
 }
