@@ -150,8 +150,8 @@ void EnclaveStart(sgx_sealed_data_t *sealed, size_t sealedSize, size_t* sealedLe
 	mbedtls_ecdh_gen_public(&ctxDH.grp, &ctxDH.d, &ctxDH.Q, mbedtls_sgx_drbg_random, NULL);
 	mbedtls_mpi_write_binary(&ctxDH.d, secret, 32);
 	mbedtls_mpi_write_binary(&ctxDH.Q.X, tmpDHPublicKey, sizeof(tmpDHPublicKey));
-	mbedtls_mpi_write_string(&ctxDH.d, 16, buff, 100, &tmpLen);
-	printf_sgx("DH Prv: %s\n", buff);
+	//mbedtls_mpi_write_string(&ctxDH.d, 16, buff, 100, &tmpLen);
+	//printf_sgx("DH Prv: %s\n", buff);
 
 	//init DSA key-pair
 	mbedtls_ecdsa_init(&ctxDSA);

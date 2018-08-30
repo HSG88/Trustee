@@ -21,7 +21,7 @@ namespace ManagedAuction
     {
         private static Web3 web3;
         private static Function submitBid, SGXDHPUBLICKEY, initialDeposit, winnerIndex, winnerBid, index;
-        public static void Initialize(string contractABI, string contractAddress, string provider = "HTTP://127.0.0.1:7545")
+        public static void Initialize(string contractABI, string contractAddress, string provider = "HTTP://127.0.0.1:8545")
         {
             web3 = new Web3(provider);
             Contract auctionContract = web3.Eth.GetContract(contractABI, contractAddress);

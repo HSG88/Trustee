@@ -21,6 +21,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ManagedEnclave", "ManagedEn
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "App", "App\App.csproj", "{BF5E0EE6-613F-4963-B1FC-1747C1288445}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C3876023-CE34-4649-BCE6-748AF080B207} = {C3876023-CE34-4649-BCE6-748AF080B207}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedAuction", "ManagedAuction\ManagedAuction.csproj", "{C3876023-CE34-4649-BCE6-748AF080B207}"
 EndProject

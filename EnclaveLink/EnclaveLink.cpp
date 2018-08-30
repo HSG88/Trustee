@@ -2,8 +2,6 @@
 #include "sgx_eid.h"		/* sgx_enclave_id_t */
 #include "sgx_uae_service.h"
 #include"Enclave_u.h"
-
-# define ENCLAVE_FILENAME "Enclave.signed.dll"
 static sgx_enclave_id_t global_eid = 0;
 
 bool CreateEnclave()
@@ -16,10 +14,10 @@ void DestroyEnclave()
 {
 	sgx_destroy_enclave(global_eid);
 }
-int GenerateKeys(unsigned char sealed[1024], unsigned char sgxAddress[20], unsigned char dhPublicKey[32])
+int GenerateKeys(unsigned char sealed[2048], unsigned char sgxAddress[20], unsigned char dhPublicKey[32])
 {
-	size_t sealedLen = 1024;
-	EnclaveStart(global_eid, (sgx_sealed_data_t*)sealed, sealedLen, &sealedLen, sgxAddress, dhPublicKey);
+	size_t sealedLen = 0;
+	EnclaveStart(global_eid, (sgx_sealed_data_t*)sealed, 2048, &sealedLen, sgxAddress, dhPublicKey);
 	return sealedLen;
 }
 int GetAuctionWinner(unsigned char* sealed, unsigned int sealedLen, unsigned char* cipher, unsigned int cipherLen, unsigned char contractAddress[20], unsigned char transaction[512])

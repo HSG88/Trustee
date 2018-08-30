@@ -33,7 +33,7 @@ namespace ManagedAuction
         public static string ContractAddress { get; private set; }
         public static string ContractABI { get; private set; }
         public static Function setWinner, bidders, index, getIndexLength;
-        public static void Initialize(string provider = "HTTP://127.0.0.1:7545")
+        public static void Initialize(string provider = "HTTP://127.0.0.1:8545")
         {
             bidingInterval = new BigInteger(20);
             sgxInterval = new BigInteger(10);
@@ -87,19 +87,21 @@ namespace ManagedAuction
             string contractCode = File.ReadAllText("Auction.sol");
             contractCode= contractCode.Replace("ADDRESSPLACEHOLDER", $"{sgxAddress}");
             contractCode= contractCode.Replace("DHPLACEHOLDER", $"{dhPublicKey}");
-            File.WriteAllText("Auction.sol", contractCode);
+            File.WriteAllText("Temp.sol", contractCode);
             File.Delete("Auction.abi");
             File.Delete("Auction.bin");
-            Process.Start(".\\solc.exe"," --abi --bin -o .\\ .\\Auction.sol").WaitForExit();            
+            Process.Start(".\\solc.exe", " --abi --bin -o .\\ .\\Temp.sol").WaitForExit();            
             ContractABI = File.ReadAllText("Auction.abi");
             contractBIN = File.ReadAllText("Auction.bin");
         }
         private static void InitSGX()
         {
-            sgx = new ManagedEnclave();
-            byte[] _sealedSecret = new byte[2024], _sgxAddress = new byte[20], _dhPublicKey = new byte[32];
+            bool success = false;
+            sgx = new ManagedEnclave(ref success);
+            if (!success)
+                throw new Exception("Failed at initializing the SGX enclave");
+            byte[] _sealedSecret = new byte[2048], _sgxAddress = new byte[20], _dhPublicKey = new byte[32];
             int sealedLength = sgx.SGX_GenerateKeys(ref _sealedSecret, ref _sgxAddress, ref _dhPublicKey);
-            Console.WriteLine(sealedLength);
             sgxAddress = "0x" + BitConverter.ToString(_sgxAddress).Replace("-", "");
             dhPublicKey = "0x" + BitConverter.ToString(_dhPublicKey).Replace("-", "");
             Array.Resize(ref _sealedSecret, sealedLength);
