@@ -11,8 +11,8 @@ public ref class ManagedEnclave
 {
 	
 public:
-	ManagedEnclave(bool% success) {
-		success = CreateEnclave();
+	ManagedEnclave() {
+		CreateEnclave();
 	}
 	~ManagedEnclave()
 	{

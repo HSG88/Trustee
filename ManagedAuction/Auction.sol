@@ -1,58 +1,87 @@
 pragma solidity ^0.4.24;
-
 contract Auction {
-    address public constant SGXADDRESS= ADDRESSPLACEHOLDER;
-    bytes32 public constant SGXDHPUBLICKEY = DHPLACEHOLDER;
-    uint public bidEnd;
-    uint public withdrawEnd;
-    uint public initialDeposit;
-    uint16 public winnerIndex;
-    uint32 public winnerBid;
-    
-    struct Bid {
-        bytes32 bidCipher;
-        bytes32 ecdhPublicKey;
+    bytes32[] public bids;
+    bytes32 public PublicKey;
+    mapping(address => uint) public ledger;
+    address public Auctioneer;
+    address public Enclave;
+    uint public T1;
+    uint public T2;
+    uint public T3;
+    uint public T4;
+    uint public D;
+    address public WinnerAddress;
+    uint32 public WinnerBid;
+    bytes32 public Hash;
+    enum State {INIT, BID, REVEAL, DISPUTE}
+    State public state;
+
+    constructor() public {
+        Auctioneer = msg.sender;
     }
-    mapping(address => Bid) public bidders;
-    address[] public index;
-    
-    constructor(uint _bidInterval, uint _sgxInterval, uint _initialDeposit) public {
-        bidEnd = block.number + _bidInterval;
-        withdrawEnd = bidEnd+_sgxInterval;
-        initialDeposit = _initialDeposit;
-    }
-	function getIndexLength() public view returns(uint) {
-		return index.length;
+	function StartAuction(address _enclave, bytes32 _publickey, uint _t1, uint _t2, uint _t3, uint _t4, uint _d) public payable
+	{
+	    require(state == State.INIT);
+	    require(msg.sender == Auctioneer);
+	    require(msg.value == _d);
+	    T1 = block.number + _t1;
+	    T2 = T1 + _t2;
+	    T3 = T2 + _t3;
+	    T4= T3 + _t4;
+	    D = _d;
+        ledger[msg.sender] = msg.value;
+        Enclave = _enclave; 
+        PublicKey = _publickey;
+	    state = State.BID;
 	}
-    function submitBid(bytes32 cipher, bytes32 key) public payable{
-        //require(block.number < bidEnd);
-        require(msg.value == initialDeposit);
-        require(bidders[msg.sender].bidCipher==0); //one time bidding only
-        index.push(msg.sender);
-        bidders[msg.sender] = Bid(cipher, key);
+	function GetLength() public view returns(uint){
+	    return bids.length;
+	}
+    function SubmitBid(bytes32 cipher, bytes32 key) public payable{
+        require(state == State.BID);
+        //require(block.number < T1);
+        require(msg.value == D);
+        ledger[msg.sender] = msg.value;
+        bids.push(cipher);
+        bids.push(key);
+        bids.push(bytes32(msg.sender));
     }
-    function setWinner(bytes32 _inputHash, uint16 _winnerIndex, uint32 _winnerBid) public {
-        require(msg.sender == SGXADDRESS);
-        //require(block.number > bidEnd);
-        //require(block.number < withdrawEnd);
-        bytes memory data = new bytes(index.length * 64);
-        for(uint i =0; i< index.length; i++)
+    function SetWinner(bytes32 _inputHash, address _winnerAddress, uint32 _winnerBid) public {
+        require(state == State.BID);
+        //require(block.number > T1);
+        //require(block.number < T2);
+        require(msg.sender == Enclave);
+        Hash = _inputHash;
+        WinnerBid = _winnerBid;
+        WinnerAddress = _winnerAddress;
+        state = State.REVEAL;
+    }
+    function Dispute() public
+    {
+        require(state == State.REVEAL);
+        //require(block.number > T2);
+        //require(block.number < T3);
+        if(Hash !=keccak256(abi.encodePacked(bids)))
             {
-                for(uint j = 0; j< 32; j++)
-                {
-                    data[i*64 +j] = bidders[index[i]].bidCipher[j];
-                    data[i*64+32+j] = bidders[index[i]].ecdhPublicKey[j];
-                }
+                state = State.DISPUTE;
+                ledger[msg.sender] += ledger[Auctioneer];
+                ledger[Auctioneer] = 0;
             }
-        require(_inputHash == keccak256(data));
-        winnerBid = _winnerBid;
-        winnerIndex = _winnerIndex;
     }
-    function withdrawDeposit() public {
-        //require(block.number > withdrawEnd);
-        require(bidders[msg.sender].bidCipher != "0x0");
-        require(index[winnerIndex] != msg.sender); //winner can't withdraw
-        delete bidders[msg.sender];
-        msg.sender.transfer(initialDeposit);
+    function Refund() public {
+        //require(block.number > T3);
+        //require(block.number < T4);
+        require((state == State.REVEAL && msg.sender != WinnerAddress) || (state == State.DISPUTE && msg.sender != Auctioneer));
+        require(ledger[msg.sender] != 0);
+        uint balance = ledger[msg.sender];
+        delete ledger[msg.sender];
+        msg.sender.transfer(balance);
+    }
+    function Reset() public {
+        require(msg.sender == Auctioneer);
+        require(block.number > T4);
+        state = State.INIT;
+        bids.length = 0;
+        Auctioneer.transfer(address(this).balance);
     }
 }

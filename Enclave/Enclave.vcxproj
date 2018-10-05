@@ -332,13 +332,11 @@
     <ClCompile Include="Enclave.cpp" />
     <ClCompile Include="Enclave_t.c" />
     <ClCompile Include="keccak.c" />
-    <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Enclave.h" />
     <ClInclude Include="Enclave_t.h" />
     <ClInclude Include="keccak.h" />
-    <ClInclude Include="Source.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Enclave.edl">

@@ -12,12 +12,13 @@
 #include "keccak.h"
 #include"glue.h"
 
-uint32_t Decrypt(mbedtls_ecdh_context& ctxDH, uint8_t* cipherText)
+uint32_t Decrypt(mbedtls_ecdh_context& ctxDH, uint8_t* cipherText, uint8_t bidAddress[32])
 {
 	sgx_aes_gcm_128bit_tag_t* tag = (sgx_aes_gcm_128bit_tag_t *)cipherText;
 	uint8_t* iv = cipherText + SGX_AESGCM_MAC_SIZE;
 	uint8_t* bidCipher = cipherText + SGX_AESGCM_MAC_SIZE+ SGX_AESGCM_IV_SIZE;
 	uint8_t* bidDhPublicKey = cipherText + 32;
+	memcpy(bidAddress, bidDhPublicKey + 32, 32);
 
 	uint8_t key[32];
 	uint32_t value = 0;
@@ -41,7 +42,7 @@ void Sign(mbedtls_ecdsa_context& ctxDSA, const uint8_t *data, size_t in_len, uin
 	mbedtls_mpi_free(&r);
 	mbedtls_mpi_free(&s);
 }
-void CreateTransaction(mbedtls_ecdsa_context& ctxDSA, uint8_t contractAddress[20], uint8_t inputHash[32], uint16_t winnerIndex, uint32_t winnerBid, uint8_t transaction[512], size_t* transactionLen)
+void CreateTransaction(mbedtls_ecdsa_context& ctxDSA, uint8_t contractAddress[20], uint8_t inputHash[32], uint8_t winnerAddress[20], uint32_t winnerBid, uint8_t transaction[512], size_t* transactionLen)
 {
 	std::vector<uint8_t> tx;
 	//empty nonce = 80
@@ -66,17 +67,16 @@ void CreateTransaction(mbedtls_ecdsa_context& ctxDSA, uint8_t contractAddress[20
 	tx.push_back(0xB8);
 	tx.push_back(0x64);
 
-	//selector c29ae58f
-	uint8_t functionSelector[] = { '\xC2', '\x9A', '\xE5', '\x8F' };
+	//selector 7471187a
+	uint8_t functionSelector[] = { '\x74', '\x71', '\x18', '\x7a' };
 	for (int i = 0; i < sizeof(functionSelector); i++)
 		tx.push_back(functionSelector[i]);
 	//input hash 
 	for (int i = 0; i < 32; i++)
 		tx.push_back(inputHash[i]);
-	//winner index
-	tx.insert(tx.end(), 30, 0); //pad
-	for (int i = 1; i >= 0; i--)
-		tx.push_back((uint8_t)(winnerIndex >> (8 * i)));
+	//winner address
+	tx.insert(tx.end(), 12, 0); //pad
+	tx.insert(tx.end(), winnerAddress, &winnerAddress[20]);
 	//winner bid
 	tx.insert(tx.end(), 28, 0);
 	for (int i = 3; i >= 0; i--)
@@ -121,17 +121,18 @@ bool RecoverContexts(sgx_sealed_data_t *sealed, size_t sealedLen, mbedtls_ecdh_c
 	mbedtls_ecp_mul(&ctxDSA.grp, &ctxDSA.Q, &ctxDSA.d, &ctxDSA.grp.G, NULL, NULL);
 	return true;
 }
-void GetWinner(mbedtls_ecdh_context& ctxDH, uint8_t* cipher, size_t cipherLen, uint32_t* winnerBid, uint16_t* winnerIndex)
+void GetWinner(mbedtls_ecdh_context& ctxDH, uint8_t* cipher, size_t cipherLen, uint32_t* winnerBid, uint8_t winnerAddress[32])
 {
 	uint32_t temp;
-	int count = cipherLen / 64;
+	uint8_t bidAddress[32];
+	int count = cipherLen / 96;
 	for (int i = 0; i < count; i++)
 	{
-		temp = Decrypt(ctxDH, cipher + i * 64);
+		temp = Decrypt(ctxDH, cipher + i * 96,bidAddress);
 		if (temp > *winnerBid)
 		{
 			*winnerBid = temp;
-			*winnerIndex = i;
+			memcpy(winnerAddress, bidAddress, 32);
 		}
 	}
 }
@@ -182,7 +183,7 @@ void EnclaveGetAuctionWinner(sgx_sealed_data_t *sealed, size_t sealedLen, uint8_
 	mbedtls_ecdh_context ctxDH;
 	mbedtls_ecdsa_context ctxDSA;
 	uint32_t winnerBid=0;
-	uint16_t winnerIndex=0;
+	uint8_t winnerAddress[32];
 	uint8_t inputHash[32];
 
 	if (!RecoverContexts(sealed, sealedLen, ctxDH, ctxDSA))
@@ -190,9 +191,9 @@ void EnclaveGetAuctionWinner(sgx_sealed_data_t *sealed, size_t sealedLen, uint8_
 		*transactionLen = 0;
 		return;
 	}
-	GetWinner(ctxDH, cipher, cipherLen, &winnerBid, &winnerIndex);
+	GetWinner(ctxDH, cipher, cipherLen, &winnerBid, winnerAddress);
 	keccak(cipher, cipherLen, inputHash, 32);
-	CreateTransaction(ctxDSA, contractAddress, inputHash, winnerIndex, winnerBid, transaction, transactionLen);
+	CreateTransaction(ctxDSA, contractAddress, inputHash, winnerAddress, winnerBid, transaction, transactionLen);
 	
 	mbedtls_ecdh_free(&ctxDH);
 	mbedtls_ecdsa_free(&ctxDSA);
