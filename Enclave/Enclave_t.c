@@ -18,6 +18,13 @@
 } while (0)
 
 
+typedef struct ms_Encrypt_t {
+	uint8_t* ms_sgxPK;
+	uint32_t ms_bid;
+	uint8_t* ms_bidPK;
+	uint8_t* ms_bidCT;
+} ms_Encrypt_t;
+
 typedef struct ms_EnclaveStart_t {
 	sgx_sealed_data_t* ms_sealed;
 	size_t ms_sealedSize;
@@ -111,6 +118,75 @@ typedef struct ms_ocall_print_string_t {
 #pragma warning(disable: 4127)
 #pragma warning(disable: 4200)
 #endif
+
+static sgx_status_t SGX_CDECL sgx_Encrypt(void* pms)
+{
+	CHECK_REF_POINTER(pms, sizeof(ms_Encrypt_t));
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
+	ms_Encrypt_t* ms = SGX_CAST(ms_Encrypt_t*, pms);
+	sgx_status_t status = SGX_SUCCESS;
+	uint8_t* _tmp_sgxPK = ms->ms_sgxPK;
+	size_t _len_sgxPK = 32 * sizeof(*_tmp_sgxPK);
+	uint8_t* _in_sgxPK = NULL;
+	uint8_t* _tmp_bidPK = ms->ms_bidPK;
+	size_t _len_bidPK = 32 * sizeof(*_tmp_bidPK);
+	uint8_t* _in_bidPK = NULL;
+	uint8_t* _tmp_bidCT = ms->ms_bidCT;
+	size_t _len_bidCT = 32 * sizeof(*_tmp_bidCT);
+	uint8_t* _in_bidCT = NULL;
+
+	CHECK_UNIQUE_POINTER(_tmp_sgxPK, _len_sgxPK);
+	CHECK_UNIQUE_POINTER(_tmp_bidPK, _len_bidPK);
+	CHECK_UNIQUE_POINTER(_tmp_bidCT, _len_bidCT);
+
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
+
+	if (_tmp_sgxPK != NULL && _len_sgxPK != 0) {
+		_in_sgxPK = (uint8_t*)malloc(_len_sgxPK);
+		if (_in_sgxPK == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memcpy(_in_sgxPK, _tmp_sgxPK, _len_sgxPK);
+	}
+	if (_tmp_bidPK != NULL && _len_bidPK != 0) {
+		if ((_in_bidPK = (uint8_t*)malloc(_len_bidPK)) == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memset((void*)_in_bidPK, 0, _len_bidPK);
+	}
+	if (_tmp_bidCT != NULL && _len_bidCT != 0) {
+		if ((_in_bidCT = (uint8_t*)malloc(_len_bidCT)) == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memset((void*)_in_bidCT, 0, _len_bidCT);
+	}
+
+	Encrypt(_in_sgxPK, ms->ms_bid, _in_bidPK, _in_bidCT);
+err:
+	if (_in_sgxPK) free(_in_sgxPK);
+	if (_in_bidPK) {
+		memcpy(_tmp_bidPK, _in_bidPK, _len_bidPK);
+		free(_in_bidPK);
+	}
+	if (_in_bidCT) {
+		memcpy(_tmp_bidCT, _in_bidCT, _len_bidCT);
+		free(_in_bidCT);
+	}
+
+	return status;
+}
 
 static sgx_status_t SGX_CDECL sgx_EnclaveStart(void* pms)
 {
@@ -301,10 +377,11 @@ err:
 
 SGX_EXTERNC const struct {
 	size_t nr_ecall;
-	struct {void* call_addr; uint8_t is_priv;} ecall_table[2];
+	struct {void* call_addr; uint8_t is_priv;} ecall_table[3];
 } g_ecall_table = {
-	2,
+	3,
 	{
+		{(void*)(uintptr_t)sgx_Encrypt, 0},
 		{(void*)(uintptr_t)sgx_EnclaveStart, 0},
 		{(void*)(uintptr_t)sgx_EnclaveGetAuctionWinner, 0},
 	}
@@ -312,21 +389,21 @@ SGX_EXTERNC const struct {
 
 SGX_EXTERNC const struct {
 	size_t nr_ocall;
-	uint8_t entry_table[11][2];
+	uint8_t entry_table[11][3];
 } g_dyn_entry_table = {
 	11,
 	{
-		{0, 0, },
-		{0, 0, },
-		{0, 0, },
-		{0, 0, },
-		{0, 0, },
-		{0, 0, },
-		{0, 0, },
-		{0, 0, },
-		{0, 0, },
-		{0, 0, },
-		{0, 0, },
+		{0, 0, 0, },
+		{0, 0, 0, },
+		{0, 0, 0, },
+		{0, 0, 0, },
+		{0, 0, 0, },
+		{0, 0, 0, },
+		{0, 0, 0, },
+		{0, 0, 0, },
+		{0, 0, 0, },
+		{0, 0, 0, },
+		{0, 0, 0, },
 	}
 };
 

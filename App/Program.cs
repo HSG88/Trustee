@@ -10,20 +10,17 @@ namespace App
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Deploying Auction");
-            Auctioneer.Initialize();            
-            Console.WriteLine(Auctioneer.ContractAddress);
-            Console.WriteLine("Starting Auction");
-            Auctioneer.StartAuction();
-            Console.ReadLine();
-            Console.WriteLine("Setwinner");
+            Auctioneer.Log = Console.WriteLine;
+            Auctioneer.DeployContract();
+            Auctioneer.InitializeSGX();
+            Auctioneer.StartAuction(20, 10, 10, 10, 1);
+            Auctioneer.SubmitBid(599);
+            Auctioneer.SubmitBid(700);
+            Auctioneer.SubmitBid(900);
+            Auctioneer.SubmitBid(200);
+            Auctioneer.SubmitBid(300);
+            Auctioneer.SubmitBid(400);
             Auctioneer.SetWinner();
-            Console.WriteLine("Dispute");
-            Auctioneer.Dispute();
-            Console.WriteLine("Refund");
-            Auctioneer.Refund();
-            Console.WriteLine("Reseting");
-            Auctioneer.Reset();
         }
     }
 }

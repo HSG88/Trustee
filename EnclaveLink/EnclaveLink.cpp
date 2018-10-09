@@ -26,3 +26,7 @@ int GetAuctionWinner(unsigned char* sealed, unsigned int sealedLen, unsigned cha
 	EnclaveGetAuctionWinner(global_eid, (sgx_sealed_data_t*)sealed, sealedLen, cipher, cipherLen, contractAddress, transaction, &transactionLen);
 	return transactionLen;
 }
+void EncryptBid(unsigned char sgxPK[32], unsigned int bid, unsigned char bidPK[32], unsigned char bidCT[32])
+{
+	Encrypt(global_eid, sgxPK, bid, bidPK, bidCT);
+}

@@ -18,6 +18,7 @@
 extern "C" {
 #endif
 
+void Encrypt(uint8_t sgxPK[32], uint32_t bid, uint8_t bidPK[32], uint8_t bidCT[32]);
 void EnclaveStart(sgx_sealed_data_t* sealed, size_t sealedSize, size_t* sealedLen, uint8_t address[20], uint8_t dhPublicKey[32]);
 void EnclaveGetAuctionWinner(sgx_sealed_data_t* sealed, size_t sealedLen, uint8_t* cipher, size_t cipherLen, uint8_t contractAddress[20], uint8_t transaction[512], size_t* transactionLen);
 

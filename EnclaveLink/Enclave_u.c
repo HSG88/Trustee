@@ -1,6 +1,13 @@
 #include "Enclave_u.h"
 #include <errno.h>
 
+typedef struct ms_Encrypt_t {
+	uint8_t* ms_sgxPK;
+	uint32_t ms_bid;
+	uint8_t* ms_bidPK;
+	uint8_t* ms_bidCT;
+} ms_Encrypt_t;
+
 typedef struct ms_EnclaveStart_t {
 	sgx_sealed_data_t* ms_sealed;
 	size_t ms_sealedSize;
@@ -197,6 +204,18 @@ static const struct {
 	}
 };
 
+sgx_status_t Encrypt(sgx_enclave_id_t eid, uint8_t sgxPK[32], uint32_t bid, uint8_t bidPK[32], uint8_t bidCT[32])
+{
+	sgx_status_t status;
+	ms_Encrypt_t ms;
+	ms.ms_sgxPK = (uint8_t*)sgxPK;
+	ms.ms_bid = bid;
+	ms.ms_bidPK = (uint8_t*)bidPK;
+	ms.ms_bidCT = (uint8_t*)bidCT;
+	status = sgx_ecall(eid, 0, &ocall_table_Enclave, &ms);
+	return status;
+}
+
 sgx_status_t EnclaveStart(sgx_enclave_id_t eid, sgx_sealed_data_t* sealed, size_t sealedSize, size_t* sealedLen, uint8_t address[20], uint8_t dhPublicKey[32])
 {
 	sgx_status_t status;
@@ -206,7 +225,7 @@ sgx_status_t EnclaveStart(sgx_enclave_id_t eid, sgx_sealed_data_t* sealed, size_
 	ms.ms_sealedLen = sealedLen;
 	ms.ms_address = (uint8_t*)address;
 	ms.ms_dhPublicKey = (uint8_t*)dhPublicKey;
-	status = sgx_ecall(eid, 0, &ocall_table_Enclave, &ms);
+	status = sgx_ecall(eid, 1, &ocall_table_Enclave, &ms);
 	return status;
 }
 
@@ -221,7 +240,7 @@ sgx_status_t EnclaveGetAuctionWinner(sgx_enclave_id_t eid, sgx_sealed_data_t* se
 	ms.ms_contractAddress = (uint8_t*)contractAddress;
 	ms.ms_transaction = (uint8_t*)transaction;
 	ms.ms_transactionLen = transactionLen;
-	status = sgx_ecall(eid, 1, &ocall_table_Enclave, &ms);
+	status = sgx_ecall(eid, 2, &ocall_table_Enclave, &ms);
 	return status;
 }
 

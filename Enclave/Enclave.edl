@@ -8,7 +8,8 @@ enclave {
     trusted {
         //public int EnclaveCreateReport([in] sgx_target_info_t* quote, [out] sgx_report_t* report);
         //public int EnclaveGetMR([out] uint8_t mr[32]);
-        
+
+        public void Encrypt([in]uint8_t sgxPK[32], uint32_t bid,[out] uint8_t bidPK[32], [out] uint8_t bidCT[32]);
         public void EnclaveStart([out, size=sealedSize] sgx_sealed_data_t* sealed, size_t sealedSize, [out] size_t* sealedLen, [out] uint8_t address[20],[out] uint8_t dhPublicKey[32]);
         public void EnclaveGetAuctionWinner([in, size=sealedLen] sgx_sealed_data_t* sealed, size_t sealedLen, [in, size = cipherLen] uint8_t* cipher, size_t cipherLen, [in] uint8_t contractAddress[20], [out] uint8_t transaction[512],  [out] size_t* transactionLen);
     };
