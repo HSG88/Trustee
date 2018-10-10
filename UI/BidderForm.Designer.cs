@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.label1 = new System.Windows.Forms.Label();
             this.txtAddress = new System.Windows.Forms.TextBox();
             this.txtBid = new System.Windows.Forms.TextBox();
@@ -39,6 +40,7 @@
             this.txtStatus = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.btnDispute = new System.Windows.Forms.Button();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // label1
@@ -96,6 +98,7 @@
             this.btnWithdraw.TabIndex = 5;
             this.btnWithdraw.Text = "Withdraw Funds";
             this.btnWithdraw.UseVisualStyleBackColor = true;
+            this.btnWithdraw.Click += new System.EventHandler(this.btnWithdraw_Click);
             // 
             // txtBalance
             // 
@@ -147,6 +150,11 @@
             this.btnDispute.UseVisualStyleBackColor = true;
             this.btnDispute.Click += new System.EventHandler(this.btnDispute_Click);
             // 
+            // timer1
+            // 
+            this.timer1.Interval = 1000;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
             // BidderForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -185,5 +193,6 @@
         private System.Windows.Forms.TextBox txtStatus;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button btnDispute;
+        private System.Windows.Forms.Timer timer1;
     }
 }

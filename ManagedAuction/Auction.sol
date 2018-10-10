@@ -39,7 +39,7 @@ contract Auction {
 	}
     function SubmitBid(bytes32 cipher, bytes32 key) public payable{
         require(state == State.BID);
-        //require(block.number < T1);
+        require(block.number < T1);
         require(msg.value == D);
         ledger[msg.sender] = msg.value;
         bids.push(cipher);
@@ -48,8 +48,8 @@ contract Auction {
     }
     function SetWinner(bytes32 _inputHash, address _winnerAddress, uint32 _winnerBid) public {
         require(state == State.BID);
-        //require(block.number > T1);
-        //require(block.number < T2);
+        require(block.number > T1);
+        require(block.number < T2);
         require(msg.sender == Enclave);
         Hash = _inputHash;
         WinnerBid = _winnerBid;
@@ -59,8 +59,8 @@ contract Auction {
     function Dispute() public
     {
         require(state == State.REVEAL);
-        //require(block.number > T2);
-        //require(block.number < T3);
+        require(block.number > T2);
+        require(block.number < T3);
         if(Hash !=keccak256(abi.encodePacked(bids)))
             {
                 state = State.DISPUTE;
@@ -69,8 +69,8 @@ contract Auction {
             }
     }
     function Refund() public {
-        //require(block.number > T3);
-        //require(block.number < T4);
+        require(block.number > T3);
+        require(block.number < T4);
         require((state == State.REVEAL && msg.sender != WinnerAddress) || (state == State.DISPUTE && msg.sender != Auctioneer));
         require(ledger[msg.sender] != 0);
         uint balance = ledger[msg.sender];

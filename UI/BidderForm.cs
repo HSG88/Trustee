@@ -42,6 +42,8 @@ namespace UI
                     txtStatus.Text = "Winner reveal interval!";                    
                     break;
                 case State.Dispute:
+                    timer1.Start();
+                    btnDispute.Enabled = true;
                     var winner = await Blockchain.WhoIsTheWinner();
                     if (winner.Address == txtAddress.Text)
                     {
@@ -49,10 +51,9 @@ namespace UI
                         txtStatus.ForeColor = Color.Green;
                     }
                     else
-                    if(winner.Balance< decimal.Parse(txtBid.Text))
+                    if (txtBid.Text != ""&& winner.Balance< decimal.Parse(txtBid.Text))
                     {
-                        txtStatus.Text = "Malicious auctioneer detected, Dispute now";
-                        btnDispute.Enabled = true;
+                        txtStatus.Text = "Malicious auctioneer detected, Dispute now";                        
                     }
                     else
                     {
@@ -61,6 +62,7 @@ namespace UI
                     }
                     break;
                 case State.Withdraw:
+                    btnDispute.Enabled = false;
                     btnWithdraw.Enabled = txtStatus.ForeColor == Color.Red;
                     break;
             }
@@ -77,9 +79,33 @@ namespace UI
             txtStatus.Text = "You submitted bid";
         }
 
-        private void btnDispute_Click(object sender, EventArgs e)
+        private async void btnDispute_Click(object sender, EventArgs e)
         {
-            
+            btnDispute.Enabled = false;
+            Blockchain.PublishDebug();
+            bool success = await Blockchain.Dispute(txtAddress.Text) == 3;
+            if (success)
+                txtStatus.Text = "You won the malicious auctioneer deposit";
+            else
+                txtStatus.Text = "The auction winner is correct";
+        }
+
+        private async void btnWithdraw_Click(object sender, EventArgs e)
+        {
+            btnWithdraw.Enabled = false;
+            await Blockchain.Withdraw(txtAddress.Text);
+            await Blockchain.Delay();
+            txtBalance.Text = (await Blockchain.GetBalanceAsync(txtAddress.Text)).ToString("F");
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if(Blockchain.GetContractState()==3)
+            {
+                txtStatus.Text = "The auction winner is invalid";
+                timer1.Stop();
+                txtStatus.ForeColor = Color.Red;
+            }
         }
     }
 }

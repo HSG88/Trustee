@@ -46,6 +46,7 @@
             this.label6 = new System.Windows.Forms.Label();
             this.btnInitializeEnclave = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.btnSetWinner = new System.Windows.Forms.Button();
             this.prgWithdraw = new System.Windows.Forms.ProgressBar();
             this.prgDispute = new System.Windows.Forms.ProgressBar();
             this.prgWinner = new System.Windows.Forms.ProgressBar();
@@ -60,10 +61,8 @@
             this.label9 = new System.Windows.Forms.Label();
             this.btnStartAuction = new System.Windows.Forms.Button();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.btnSetWinner = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
             this.txtSkip = new System.Windows.Forms.TextBox();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -240,7 +239,6 @@
             // 
             // groupBox3
             // 
-            this.groupBox3.Controls.Add(this.btnSetWinner);
             this.groupBox3.Controls.Add(this.prgWithdraw);
             this.groupBox3.Controls.Add(this.prgDispute);
             this.groupBox3.Controls.Add(this.prgWinner);
@@ -259,6 +257,17 @@
             this.groupBox3.Size = new System.Drawing.Size(476, 154);
             this.groupBox3.TabIndex = 32;
             this.groupBox3.TabStop = false;
+            // 
+            // btnSetWinner
+            // 
+            this.btnSetWinner.Enabled = false;
+            this.btnSetWinner.Location = new System.Drawing.Point(189, 45);
+            this.btnSetWinner.Name = "btnSetWinner";
+            this.btnSetWinner.Size = new System.Drawing.Size(167, 24);
+            this.btnSetWinner.TabIndex = 29;
+            this.btnSetWinner.Text = "4- Set Winner";
+            this.btnSetWinner.UseVisualStyleBackColor = true;
+            this.btnSetWinner.Click += new System.EventHandler(this.btnSetWinner_Click);
             // 
             // prgWithdraw
             // 
@@ -367,9 +376,9 @@
             // btnStartAuction
             // 
             this.btnStartAuction.Enabled = false;
-            this.btnStartAuction.Location = new System.Drawing.Point(112, 124);
+            this.btnStartAuction.Location = new System.Drawing.Point(189, 124);
             this.btnStartAuction.Name = "btnStartAuction";
-            this.btnStartAuction.Size = new System.Drawing.Size(132, 24);
+            this.btnStartAuction.Size = new System.Drawing.Size(167, 24);
             this.btnStartAuction.TabIndex = 22;
             this.btnStartAuction.Text = "3- Start Auction";
             this.btnStartAuction.UseVisualStyleBackColor = true;
@@ -377,30 +386,19 @@
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.btnSetWinner);
             this.groupBox4.Controls.Add(this.label11);
             this.groupBox4.Controls.Add(this.txtSkip);
-            this.groupBox4.Controls.Add(this.checkBox1);
             this.groupBox4.Location = new System.Drawing.Point(12, 446);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(476, 100);
+            this.groupBox4.Size = new System.Drawing.Size(476, 75);
             this.groupBox4.TabIndex = 33;
             this.groupBox4.TabStop = false;
-            // 
-            // btnSetWinner
-            // 
-            this.btnSetWinner.Enabled = false;
-            this.btnSetWinner.Location = new System.Drawing.Point(286, 124);
-            this.btnSetWinner.Name = "btnSetWinner";
-            this.btnSetWinner.Size = new System.Drawing.Size(132, 24);
-            this.btnSetWinner.TabIndex = 29;
-            this.btnSetWinner.Text = "4- Set Winner";
-            this.btnSetWinner.UseVisualStyleBackColor = true;
-            this.btnSetWinner.Click += new System.EventHandler(this.btnSetWinner_Click);
             // 
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(7, 46);
+            this.label11.Location = new System.Drawing.Point(6, 22);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(100, 13);
             this.label11.TabIndex = 16;
@@ -410,21 +408,10 @@
             // 
             this.txtSkip.BackColor = System.Drawing.SystemColors.Control;
             this.txtSkip.ForeColor = System.Drawing.SystemColors.MenuHighlight;
-            this.txtSkip.Location = new System.Drawing.Point(112, 43);
+            this.txtSkip.Location = new System.Drawing.Point(113, 19);
             this.txtSkip.Name = "txtSkip";
             this.txtSkip.Size = new System.Drawing.Size(342, 20);
             this.txtSkip.TabIndex = 17;
-            // 
-            // checkBox1
-            // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Enabled = false;
-            this.checkBox1.Location = new System.Drawing.Point(10, 20);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(148, 17);
-            this.checkBox1.TabIndex = 0;
-            this.checkBox1.Text = "I\'m a malicious Auctioneer";
-            this.checkBox1.UseVisualStyleBackColor = true;
             // 
             // timer1
             // 
@@ -434,7 +421,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(501, 551);
+            this.ClientSize = new System.Drawing.Size(501, 524);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
@@ -491,7 +478,6 @@
         private System.Windows.Forms.Button btnSetWinner;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.TextBox txtSkip;
-        private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.Timer timer1;
     }
 }

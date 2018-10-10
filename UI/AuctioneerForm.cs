@@ -25,7 +25,7 @@ namespace UI
             timer1.Tick += UpdateProgress;        
         }
 
-        private void UpdateProgress(object sender, EventArgs e)
+        private async void UpdateProgress(object sender, EventArgs e)
         {
             var x = Blockchain.GetBlockNumber();
             if(T0< x && x <= T1)
@@ -48,7 +48,6 @@ namespace UI
                     prgBidding.Value = 100;
                     btnSetWinner.Enabled = true;
                     txtSkip.ReadOnly = false;
-                    checkBox1.Enabled = true;
                 }                
                 var a = x - T1;
                 var b = T2 - T1;
@@ -58,9 +57,11 @@ namespace UI
             {
                 if (state != State.Dispute)
                 {
+                    timer1.Stop();
                     state = State.Dispute;
                     StateChanged(state);
                     prgWinner.Value = 100;
+                    timer1.Start();
                 }                
                 var a = x - T2;
                 var b = T3 - T2;
@@ -70,9 +71,14 @@ namespace UI
             {
                 if (state != State.Withdraw)
                 {
+                    timer1.Stop();
+                    await Blockchain.Withdraw(txtAuctioneerAddress.Text);
+                    await Blockchain.Delay();
+                    txtAuctioneerBalance.Text = (await Blockchain.GetBalanceAsync(txtAuctioneerAddress.Text)).ToString("F");
                     state = State.Withdraw;
                     StateChanged(state);
                     prgDispute.Value = 100;
+                    timer1.Start();
                 }
                 var a = x - T3;
                 var b = T4 - T3;
@@ -82,15 +88,16 @@ namespace UI
             {
                 prgWithdraw.Value = 100;
                 timer1.Stop();
+                await Blockchain.Finalize();
+                await Blockchain.Delay();
+                txtAuctioneerBalance.Text = (await Blockchain.GetBalanceAsync(txtAuctioneerAddress.Text)).ToString("F");
             }
-
         }
 
         private async void btnSetWinner_Click(object sender, EventArgs e)
         {
             btnSetWinner.Enabled = false;
             txtSkip.ReadOnly = true;
-            checkBox1.Enabled = false;
             byte[] bids = await Blockchain.RetrieveSealedBidsAsync(txtSkip.Text);
             byte[] tx = Enclave.GetSetWinnerRawTransaction(bids, Blockchain.ContractAddress);
             await Blockchain.SendRawTransaction(tx);

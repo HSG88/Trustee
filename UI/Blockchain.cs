@@ -22,7 +22,7 @@ namespace UI
     static class Blockchain
     {
         public static byte[] ContractAddress { get { return BigInteger.Parse(auctionContract.Address.Substring(2), System.Globalization.NumberStyles.AllowHexSpecifier).ToByteArray().Reverse().ToArray(); } }
-        public const int ActiveCount = 4;        
+        public const int ActiveCount = 3;        
         private static string[] accounts;
         private static BigInteger initialDeposit;
         private static Web3 web3;
@@ -90,12 +90,14 @@ namespace UI
             for (int i = 0; i < count; i++)
             {
                 bid = await auctionContract.GetFunction("bids").CallAsync<byte[]>(i);
-                if (i % 2 == 0)
+                if ((1+i) % 3 == 0)
                 {
-                    string address ="0x"+ BitConverter.ToString(bid).Replace("-", "").ToLower();
+                    byte[] bAddress = new byte[20];
+                    Array.Copy(bid, 12, bAddress, 0, 20);
+                    string address ="0x"+ BitConverter.ToString(bAddress).Replace("-", "").ToLower();
                     if(address == skip)
                     {
-                        lstcipher.RemoveRange(i - 2, 2);
+                        lstcipher.RemoveRange(lstcipher.Count - 64, 64);
                         continue;
                     }
                 }
@@ -114,6 +116,36 @@ namespace UI
             af.Address= await auctionContract.GetFunction("WinnerAddress").CallAsync<string>();
             af.Balance= await auctionContract.GetFunction("WinnerBid").CallAsync<uint>();
             return af;
+        }
+        public static async Task<uint> Dispute(string from)
+        {
+            await auctionContract.GetFunction("Dispute").SendTransactionAndWaitForReceiptAsync(from, new HexBigInteger(5000000), new HexBigInteger(1), new HexBigInteger(0));
+            await Delay();
+            return await auctionContract.GetFunction("state").CallAsync<uint>();
+        }
+        public static async Task Withdraw(string from)
+        {
+            await auctionContract.GetFunction("Refund").SendTransactionAndWaitForReceiptAsync(from, new HexBigInteger(5000000), new HexBigInteger(1), new HexBigInteger(0));
+        }
+        public static async Task Finalize()
+        {
+            await auctionContract.GetFunction("Reset").SendTransactionAndWaitForReceiptAsync(accounts[0], new HexBigInteger(5000000), new HexBigInteger(1), new HexBigInteger(0));
+        }
+        public static uint GetContractState()
+        {
+            return auctionContract.GetFunction("state").CallAsync<uint>().Result;
+        }
+        public static void PublishDebug()
+        {
+            var b = auctionContract.GetFunction("ledger").CallAsync<BigInteger>(accounts[0]).Result;
+            var x = web3.Eth.Blocks.GetBlockNumber.SendRequestAsync().Result.Value;
+            var t1 = auctionContract.GetFunction("T1").CallAsync<BigInteger>().Result;
+            var t2 = auctionContract.GetFunction("T2").CallAsync<BigInteger>().Result;
+            var t3 = auctionContract.GetFunction("T3").CallAsync<BigInteger>().Result;
+            var t4 = auctionContract.GetFunction("T4").CallAsync<BigInteger>().Result;
+            var state = auctionContract.GetFunction("state").CallAsync<uint>().Result;
+
+            Debug.WriteLine($"Balance={b}, X={x}, T1={t1}, T2={t2}, T3={t3}, T4={t4}, State= {state}");
         }
     }
 }
