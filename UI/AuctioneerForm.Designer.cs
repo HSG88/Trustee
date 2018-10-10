@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.txtAuctioneerBalance = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.txtAuctioneerAddress = new System.Windows.Forms.TextBox();
@@ -59,10 +60,11 @@
             this.label9 = new System.Windows.Forms.Label();
             this.btnStartAuction = new System.Windows.Forms.Button();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.btnSetWinner = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.txtSkip = new System.Windows.Forms.TextBox();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -71,10 +73,9 @@
             // 
             // txtAuctioneerBalance
             // 
-            this.txtAuctioneerBalance.BackColor = System.Drawing.Color.LightGray;
-            this.txtAuctioneerBalance.Enabled = false;
-            this.txtAuctioneerBalance.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
-            this.txtAuctioneerBalance.Location = new System.Drawing.Point(111, 44);
+            this.txtAuctioneerBalance.BackColor = System.Drawing.Color.White;
+            this.txtAuctioneerBalance.ForeColor = System.Drawing.Color.Lime;
+            this.txtAuctioneerBalance.Location = new System.Drawing.Point(112, 44);
             this.txtAuctioneerBalance.Name = "txtAuctioneerBalance";
             this.txtAuctioneerBalance.ReadOnly = true;
             this.txtAuctioneerBalance.Size = new System.Drawing.Size(342, 20);
@@ -92,10 +93,11 @@
             // 
             // txtAuctioneerAddress
             // 
-            this.txtAuctioneerAddress.BackColor = System.Drawing.Color.LightGray;
-            this.txtAuctioneerAddress.ForeColor = System.Drawing.SystemColors.MenuHighlight;
+            this.txtAuctioneerAddress.BackColor = System.Drawing.Color.White;
+            this.txtAuctioneerAddress.ForeColor = System.Drawing.Color.Blue;
             this.txtAuctioneerAddress.Location = new System.Drawing.Point(111, 18);
             this.txtAuctioneerAddress.Name = "txtAuctioneerAddress";
+            this.txtAuctioneerAddress.ReadOnly = true;
             this.txtAuctioneerAddress.Size = new System.Drawing.Size(342, 20);
             this.txtAuctioneerAddress.TabIndex = 15;
             // 
@@ -110,10 +112,11 @@
             // 
             // txtContractAddress
             // 
-            this.txtContractAddress.BackColor = System.Drawing.Color.LightGray;
-            this.txtContractAddress.ForeColor = System.Drawing.SystemColors.MenuHighlight;
+            this.txtContractAddress.BackColor = System.Drawing.Color.White;
+            this.txtContractAddress.ForeColor = System.Drawing.Color.Blue;
             this.txtContractAddress.Location = new System.Drawing.Point(111, 70);
             this.txtContractAddress.Name = "txtContractAddress";
+            this.txtContractAddress.ReadOnly = true;
             this.txtContractAddress.Size = new System.Drawing.Size(342, 20);
             this.txtContractAddress.TabIndex = 21;
             // 
@@ -134,6 +137,7 @@
             this.btnDeployContract.TabIndex = 22;
             this.btnDeployContract.Text = "1- Deploy Contract";
             this.btnDeployContract.UseVisualStyleBackColor = true;
+            this.btnDeployContract.Click += new System.EventHandler(this.btnDeployContract_Click);
             // 
             // groupBox1
             // 
@@ -167,10 +171,11 @@
             // 
             // txtEnclavePublicKey
             // 
-            this.txtEnclavePublicKey.BackColor = System.Drawing.Color.LightGray;
-            this.txtEnclavePublicKey.ForeColor = System.Drawing.SystemColors.MenuHighlight;
+            this.txtEnclavePublicKey.BackColor = System.Drawing.Color.White;
+            this.txtEnclavePublicKey.ForeColor = System.Drawing.Color.Blue;
             this.txtEnclavePublicKey.Location = new System.Drawing.Point(111, 70);
             this.txtEnclavePublicKey.Name = "txtEnclavePublicKey";
+            this.txtEnclavePublicKey.ReadOnly = true;
             this.txtEnclavePublicKey.Size = new System.Drawing.Size(342, 20);
             this.txtEnclavePublicKey.TabIndex = 21;
             // 
@@ -185,10 +190,11 @@
             // 
             // txtEnclaveAddress
             // 
-            this.txtEnclaveAddress.BackColor = System.Drawing.Color.LightGray;
-            this.txtEnclaveAddress.ForeColor = System.Drawing.SystemColors.MenuHighlight;
+            this.txtEnclaveAddress.BackColor = System.Drawing.Color.White;
+            this.txtEnclaveAddress.ForeColor = System.Drawing.Color.Blue;
             this.txtEnclaveAddress.Location = new System.Drawing.Point(111, 18);
             this.txtEnclaveAddress.Name = "txtEnclaveAddress";
+            this.txtEnclaveAddress.ReadOnly = true;
             this.txtEnclaveAddress.Size = new System.Drawing.Size(342, 20);
             this.txtEnclaveAddress.TabIndex = 15;
             // 
@@ -203,9 +209,8 @@
             // 
             // txtEnclaveBalance
             // 
-            this.txtEnclaveBalance.BackColor = System.Drawing.Color.LightGray;
-            this.txtEnclaveBalance.Enabled = false;
-            this.txtEnclaveBalance.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
+            this.txtEnclaveBalance.BackColor = System.Drawing.Color.White;
+            this.txtEnclaveBalance.ForeColor = System.Drawing.Color.Lime;
             this.txtEnclaveBalance.Location = new System.Drawing.Point(111, 44);
             this.txtEnclaveBalance.Name = "txtEnclaveBalance";
             this.txtEnclaveBalance.ReadOnly = true;
@@ -224,15 +229,18 @@
             // 
             // btnInitializeEnclave
             // 
+            this.btnInitializeEnclave.Enabled = false;
             this.btnInitializeEnclave.Location = new System.Drawing.Point(189, 96);
             this.btnInitializeEnclave.Name = "btnInitializeEnclave";
             this.btnInitializeEnclave.Size = new System.Drawing.Size(167, 24);
             this.btnInitializeEnclave.TabIndex = 22;
             this.btnInitializeEnclave.Text = "2- Initialize Enclave";
             this.btnInitializeEnclave.UseVisualStyleBackColor = true;
+            this.btnInitializeEnclave.Click += new System.EventHandler(this.btnInitializeEnclave_Click);
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.btnSetWinner);
             this.groupBox3.Controls.Add(this.prgWithdraw);
             this.groupBox3.Controls.Add(this.prgDispute);
             this.groupBox3.Controls.Add(this.prgWinner);
@@ -282,10 +290,11 @@
             // 
             // txtWithdraw
             // 
-            this.txtWithdraw.BackColor = System.Drawing.SystemColors.Control;
+            this.txtWithdraw.BackColor = System.Drawing.Color.Yellow;
             this.txtWithdraw.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.txtWithdraw.Location = new System.Drawing.Point(112, 96);
             this.txtWithdraw.Name = "txtWithdraw";
+            this.txtWithdraw.ReadOnly = true;
             this.txtWithdraw.Size = new System.Drawing.Size(132, 20);
             this.txtWithdraw.TabIndex = 24;
             // 
@@ -300,10 +309,11 @@
             // 
             // txtDispute
             // 
-            this.txtDispute.BackColor = System.Drawing.SystemColors.Control;
+            this.txtDispute.BackColor = System.Drawing.Color.Yellow;
             this.txtDispute.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.txtDispute.Location = new System.Drawing.Point(111, 70);
             this.txtDispute.Name = "txtDispute";
+            this.txtDispute.ReadOnly = true;
             this.txtDispute.Size = new System.Drawing.Size(132, 20);
             this.txtDispute.TabIndex = 21;
             // 
@@ -318,10 +328,11 @@
             // 
             // txtBidding
             // 
-            this.txtBidding.BackColor = System.Drawing.SystemColors.Control;
+            this.txtBidding.BackColor = System.Drawing.Color.Yellow;
             this.txtBidding.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.txtBidding.Location = new System.Drawing.Point(111, 18);
             this.txtBidding.Name = "txtBidding";
+            this.txtBidding.ReadOnly = true;
             this.txtBidding.Size = new System.Drawing.Size(132, 20);
             this.txtBidding.TabIndex = 15;
             // 
@@ -336,10 +347,11 @@
             // 
             // txtWinner
             // 
-            this.txtWinner.BackColor = System.Drawing.SystemColors.Control;
+            this.txtWinner.BackColor = System.Drawing.Color.Yellow;
             this.txtWinner.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.txtWinner.Location = new System.Drawing.Point(111, 44);
             this.txtWinner.Name = "txtWinner";
+            this.txtWinner.ReadOnly = true;
             this.txtWinner.Size = new System.Drawing.Size(132, 20);
             this.txtWinner.TabIndex = 19;
             // 
@@ -354,18 +366,19 @@
             // 
             // btnStartAuction
             // 
-            this.btnStartAuction.Location = new System.Drawing.Point(190, 122);
+            this.btnStartAuction.Enabled = false;
+            this.btnStartAuction.Location = new System.Drawing.Point(112, 124);
             this.btnStartAuction.Name = "btnStartAuction";
-            this.btnStartAuction.Size = new System.Drawing.Size(167, 24);
+            this.btnStartAuction.Size = new System.Drawing.Size(132, 24);
             this.btnStartAuction.TabIndex = 22;
             this.btnStartAuction.Text = "3- Start Auction";
             this.btnStartAuction.UseVisualStyleBackColor = true;
+            this.btnStartAuction.Click += new System.EventHandler(this.btnStartAuction_Click);
             // 
             // groupBox4
             // 
-            this.groupBox4.Controls.Add(this.button1);
             this.groupBox4.Controls.Add(this.label11);
-            this.groupBox4.Controls.Add(this.textBox1);
+            this.groupBox4.Controls.Add(this.txtSkip);
             this.groupBox4.Controls.Add(this.checkBox1);
             this.groupBox4.Location = new System.Drawing.Point(12, 446);
             this.groupBox4.Name = "groupBox4";
@@ -373,15 +386,16 @@
             this.groupBox4.TabIndex = 33;
             this.groupBox4.TabStop = false;
             // 
-            // checkBox1
+            // btnSetWinner
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(10, 20);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(148, 17);
-            this.checkBox1.TabIndex = 0;
-            this.checkBox1.Text = "I\'m a malicious Auctioneer";
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.btnSetWinner.Enabled = false;
+            this.btnSetWinner.Location = new System.Drawing.Point(286, 124);
+            this.btnSetWinner.Name = "btnSetWinner";
+            this.btnSetWinner.Size = new System.Drawing.Size(132, 24);
+            this.btnSetWinner.TabIndex = 29;
+            this.btnSetWinner.Text = "4- Set Winner";
+            this.btnSetWinner.UseVisualStyleBackColor = true;
+            this.btnSetWinner.Click += new System.EventHandler(this.btnSetWinner_Click);
             // 
             // label11
             // 
@@ -392,29 +406,35 @@
             this.label11.TabIndex = 16;
             this.label11.Text = "Skip bidder address";
             // 
-            // textBox1
+            // txtSkip
             // 
-            this.textBox1.BackColor = System.Drawing.SystemColors.Control;
-            this.textBox1.ForeColor = System.Drawing.SystemColors.MenuHighlight;
-            this.textBox1.Location = new System.Drawing.Point(112, 43);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(342, 20);
-            this.textBox1.TabIndex = 17;
+            this.txtSkip.BackColor = System.Drawing.SystemColors.Control;
+            this.txtSkip.ForeColor = System.Drawing.SystemColors.MenuHighlight;
+            this.txtSkip.Location = new System.Drawing.Point(112, 43);
+            this.txtSkip.Name = "txtSkip";
+            this.txtSkip.Size = new System.Drawing.Size(342, 20);
+            this.txtSkip.TabIndex = 17;
             // 
-            // button1
+            // checkBox1
             // 
-            this.button1.Location = new System.Drawing.Point(189, 69);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(167, 24);
-            this.button1.TabIndex = 29;
-            this.button1.Text = "4- Set Winner";
-            this.button1.UseVisualStyleBackColor = true;
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Enabled = false;
+            this.checkBox1.Location = new System.Drawing.Point(10, 20);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(148, 17);
+            this.checkBox1.TabIndex = 0;
+            this.checkBox1.Text = "I\'m a malicious Auctioneer";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            // 
+            // timer1
+            // 
+            this.timer1.Interval = 1000;
             // 
             // AuctioneerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(501, 552);
+            this.ClientSize = new System.Drawing.Size(501, 551);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
@@ -468,9 +488,10 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Button btnStartAuction;
         private System.Windows.Forms.GroupBox groupBox4;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnSetWinner;
         private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox txtSkip;
         private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.Timer timer1;
     }
 }

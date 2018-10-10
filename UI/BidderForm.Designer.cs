@@ -52,14 +52,17 @@
             // 
             // txtAddress
             // 
+            this.txtAddress.BackColor = System.Drawing.Color.White;
+            this.txtAddress.ForeColor = System.Drawing.Color.Blue;
             this.txtAddress.Location = new System.Drawing.Point(69, 9);
             this.txtAddress.Name = "txtAddress";
+            this.txtAddress.ReadOnly = true;
             this.txtAddress.Size = new System.Drawing.Size(312, 20);
             this.txtAddress.TabIndex = 1;
             // 
             // txtBid
             // 
-            this.txtBid.Location = new System.Drawing.Point(69, 61);
+            this.txtBid.Location = new System.Drawing.Point(69, 87);
             this.txtBid.Name = "txtBid";
             this.txtBid.Size = new System.Drawing.Size(310, 20);
             this.txtBid.TabIndex = 3;
@@ -67,7 +70,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 64);
+            this.label2.Location = new System.Drawing.Point(9, 90);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(22, 13);
             this.label2.TabIndex = 2;
@@ -75,16 +78,19 @@
             // 
             // btnSubmit
             // 
-            this.btnSubmit.Location = new System.Drawing.Point(69, 92);
+            this.btnSubmit.Enabled = false;
+            this.btnSubmit.Location = new System.Drawing.Point(69, 113);
             this.btnSubmit.Name = "btnSubmit";
             this.btnSubmit.Size = new System.Drawing.Size(100, 24);
             this.btnSubmit.TabIndex = 4;
             this.btnSubmit.Text = "Submit Bid";
             this.btnSubmit.UseVisualStyleBackColor = true;
+            this.btnSubmit.Click += new System.EventHandler(this.btnSubmit_Click);
             // 
             // btnWithdraw
             // 
-            this.btnWithdraw.Location = new System.Drawing.Point(281, 92);
+            this.btnWithdraw.Enabled = false;
+            this.btnWithdraw.Location = new System.Drawing.Point(281, 113);
             this.btnWithdraw.Name = "btnWithdraw";
             this.btnWithdraw.Size = new System.Drawing.Size(100, 24);
             this.btnWithdraw.TabIndex = 5;
@@ -93,18 +99,18 @@
             // 
             // txtBalance
             // 
-            this.txtBalance.BackColor = System.Drawing.Color.LightGray;
-            this.txtBalance.Enabled = false;
-            this.txtBalance.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
-            this.txtBalance.Location = new System.Drawing.Point(259, 35);
+            this.txtBalance.BackColor = System.Drawing.Color.White;
+            this.txtBalance.ForeColor = System.Drawing.Color.Lime;
+            this.txtBalance.Location = new System.Drawing.Point(69, 35);
             this.txtBalance.Name = "txtBalance";
-            this.txtBalance.Size = new System.Drawing.Size(122, 20);
+            this.txtBalance.ReadOnly = true;
+            this.txtBalance.Size = new System.Drawing.Size(310, 20);
             this.txtBalance.TabIndex = 13;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(207, 38);
+            this.label4.Location = new System.Drawing.Point(9, 38);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(46, 13);
             this.label4.TabIndex = 12;
@@ -112,20 +118,19 @@
             // 
             // txtStatus
             // 
-            this.txtStatus.BackColor = System.Drawing.Color.LightGray;
-            this.txtStatus.Enabled = false;
+            this.txtStatus.BackColor = System.Drawing.Color.White;
             this.txtStatus.ForeColor = System.Drawing.Color.Red;
-            this.txtStatus.Location = new System.Drawing.Point(69, 35);
+            this.txtStatus.Location = new System.Drawing.Point(69, 61);
             this.txtStatus.Name = "txtStatus";
             this.txtStatus.ReadOnly = true;
-            this.txtStatus.Size = new System.Drawing.Size(122, 20);
+            this.txtStatus.Size = new System.Drawing.Size(310, 20);
             this.txtStatus.TabIndex = 11;
             this.txtStatus.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(9, 38);
+            this.label3.Location = new System.Drawing.Point(9, 64);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(37, 13);
             this.label3.TabIndex = 10;
@@ -133,18 +138,20 @@
             // 
             // btnDispute
             // 
-            this.btnDispute.Location = new System.Drawing.Point(175, 92);
+            this.btnDispute.Enabled = false;
+            this.btnDispute.Location = new System.Drawing.Point(175, 113);
             this.btnDispute.Name = "btnDispute";
             this.btnDispute.Size = new System.Drawing.Size(100, 24);
             this.btnDispute.TabIndex = 14;
             this.btnDispute.Text = "Dispute";
             this.btnDispute.UseVisualStyleBackColor = true;
+            this.btnDispute.Click += new System.EventHandler(this.btnDispute_Click);
             // 
             // BidderForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(391, 128);
+            this.ClientSize = new System.Drawing.Size(391, 143);
             this.Controls.Add(this.btnDispute);
             this.Controls.Add(this.txtBalance);
             this.Controls.Add(this.label4);

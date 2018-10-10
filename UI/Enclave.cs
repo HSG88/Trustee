@@ -10,6 +10,7 @@ namespace UI
     static class Enclave
     {
         private static byte[] _sealedSecret = new byte[2048], _sgxAddress = new byte[20], _dhPublicKey = new byte[32];
+        public static byte[] PublicKey { get { return _dhPublicKey; } }
         private static ManagedEnclave sgx;
         public static void InitializeEnclave(out string EnclaveAddress, out string EnclavePublicKey)
         {
