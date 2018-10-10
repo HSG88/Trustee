@@ -113,12 +113,6 @@
     <Compile Include="AuctioneerForm.Designer.cs">
       <DependentUpon>AuctioneerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="AuctionForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AuctionForm.Designer.cs">
-      <DependentUpon>AuctionForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="BidderForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -127,25 +121,13 @@
     </Compile>
     <Compile Include="Blockchain.cs" />
     <Compile Include="Enclave.cs" />
-    <Compile Include="MainForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MainForm.Designer.cs">
-      <DependentUpon>MainForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="AuctioneerForm.resx">
       <DependentUpon>AuctioneerForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="AuctionForm.resx">
-      <DependentUpon>AuctionForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="BidderForm.resx">
       <DependentUpon>BidderForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MainForm.resx">
-      <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -173,10 +155,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ManagedAuction\ManagedAuction.csproj">
-      <Project>{c3876023-ce34-4649-bce6-748af080b207}</Project>
-      <Name>ManagedAuction</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ManagedEnclave\ManagedEnclave.vcxproj">
       <Project>{ca7a53a4-5f18-41d1-bc25-38b512e62d3c}</Project>
       <Name>ManagedEnclave</Name>
