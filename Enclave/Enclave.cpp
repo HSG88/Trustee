@@ -12,13 +12,33 @@
 #include "keccak.h"
 #include"glue.h"
 
+void Encrypt(uint8_t sgxPK[32], uint32_t bid, uint8_t bidPK[32], uint8_t bidCT[32])
+{
+	uint8_t tmpDHPublicKey[32], key[32], dst[32];
+	mbedtls_ecdh_context bidDH;
+	mbedtls_ecdh_init(&bidDH);
+	mbedtls_ecp_group_load(&bidDH.grp, MBEDTLS_ECP_DP_CURVE25519);
+	mbedtls_ecdh_gen_public(&bidDH.grp, &bidDH.d, &bidDH.Q, mbedtls_sgx_drbg_random, NULL);
+	mbedtls_mpi_write_binary(&bidDH.Q.X, tmpDHPublicKey, sizeof(tmpDHPublicKey));
+	mbedtls_mpi_read_binary(&bidDH.Qp.X, sgxPK, 32);
+	mbedtls_mpi_lset(&bidDH.Qp.Z, 1);
+	mbedtls_ecdh_compute_shared(&bidDH.grp, &bidDH.z, &bidDH.Qp, &bidDH.d, NULL, NULL);
+	mbedtls_mpi_write_binary(&bidDH.z, key, 32);
+	sgx_read_rand(dst + SGX_AESGCM_MAC_SIZE, SGX_AESGCM_IV_SIZE);
+	sgx_rijndael128GCM_encrypt((sgx_aes_gcm_128bit_key_t*)&key, (uint8_t*)&bid, sizeof(bid), dst + SGX_AESGCM_MAC_SIZE + SGX_AESGCM_IV_SIZE,
+		dst + SGX_AESGCM_MAC_SIZE, SGX_AESGCM_IV_SIZE,NULL, 0,(sgx_aes_gcm_128bit_tag_t *)(dst));
+	memcpy(bidCT, dst, 32);
+	memcpy(bidPK, tmpDHPublicKey, 32);
+	mbedtls_ecdh_free(&bidDH);
+}
+
 uint32_t Decrypt(mbedtls_ecdh_context& ctxDH, uint8_t* cipherText, uint8_t bidAddress[32])
 {
 	sgx_aes_gcm_128bit_tag_t* tag = (sgx_aes_gcm_128bit_tag_t *)cipherText;
 	uint8_t* iv = cipherText + SGX_AESGCM_MAC_SIZE;
 	uint8_t* bidCipher = cipherText + SGX_AESGCM_MAC_SIZE+ SGX_AESGCM_IV_SIZE;
 	uint8_t* bidDhPublicKey = cipherText + 32;
-	memcpy(bidAddress, bidDhPublicKey + 32, 32);
+	memcpy(bidAddress, cipherText + 64, 32);
 
 	uint8_t key[32];
 	uint32_t value = 0;
@@ -42,7 +62,7 @@ void Sign(mbedtls_ecdsa_context& ctxDSA, const uint8_t *data, size_t in_len, uin
 	mbedtls_mpi_free(&r);
 	mbedtls_mpi_free(&s);
 }
-void CreateTransaction(mbedtls_ecdsa_context& ctxDSA, uint8_t contractAddress[20], uint8_t inputHash[32], uint8_t winnerAddress[20], uint32_t winnerBid, uint8_t transaction[512], size_t* transactionLen)
+void CreateTransaction(mbedtls_ecdsa_context& ctxDSA, uint8_t contractAddress[20], uint8_t inputHash[32], uint8_t winnerAddress[32], uint32_t winnerBid, uint8_t transaction[512], size_t* transactionLen)
 {
 	std::vector<uint8_t> tx;
 	//empty nonce = 80
@@ -74,9 +94,8 @@ void CreateTransaction(mbedtls_ecdsa_context& ctxDSA, uint8_t contractAddress[20
 	//input hash 
 	for (int i = 0; i < 32; i++)
 		tx.push_back(inputHash[i]);
-	//winner address
-	tx.insert(tx.end(), 12, 0); //pad
-	tx.insert(tx.end(), winnerAddress, &winnerAddress[20]);
+	//winner address	
+	tx.insert(tx.end(), winnerAddress, &winnerAddress[32]);
 	//winner bid
 	tx.insert(tx.end(), 28, 0);
 	for (int i = 3; i >= 0; i--)
