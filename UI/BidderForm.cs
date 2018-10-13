@@ -62,6 +62,7 @@ namespace UI
                     }
                     break;
                 case State.Withdraw:
+                    timer1.Stop();
                     btnDispute.Enabled = false;
                     btnWithdraw.Enabled = txtStatus.ForeColor == Color.Red;
                     break;
@@ -103,6 +104,7 @@ namespace UI
             if(Blockchain.GetContractState()==3)
             {
                 txtStatus.Text = "The auction winner is invalid";
+                btnDispute.Enabled = false;
                 timer1.Stop();
                 txtStatus.ForeColor = Color.Red;
             }

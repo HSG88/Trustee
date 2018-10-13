@@ -22,7 +22,7 @@ namespace UI
     static class Blockchain
     {
         public static byte[] ContractAddress { get { return BigInteger.Parse(auctionContract.Address.Substring(2), System.Globalization.NumberStyles.AllowHexSpecifier).ToByteArray().Reverse().ToArray(); } }
-        public const int ActiveCount = 3;        
+        public const int ActiveCount = 4;        
         private static string[] accounts;
         private static BigInteger initialDeposit;
         private static Web3 web3;
