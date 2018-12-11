@@ -12,7 +12,7 @@ using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Util;
 using System.Numerics;
 using Nethereum.Contracts;
-namespace UI
+namespace App
 {
     class AccountInfo
     {
@@ -56,32 +56,35 @@ namespace UI
         {
             return  web3.Eth.Blocks.GetBlockNumber.SendRequestAsync().Result;
         }
-        public static async Task SendFundAsync(string to, long fund)
+        public static void SendFundAsync(string to, long fund)
         {
-            await web3.TransactionManager.SendTransactionAsync(accounts[0], to, new HexBigInteger(UnitConversion.Convert.ToWei(fund)));
+            web3.TransactionManager.SendTransactionAsync(accounts[0], to, new HexBigInteger(UnitConversion.Convert.ToWei(fund))).Wait();
         }
-        public static async Task<string> DeployContractAsync()
+        public static BigInteger DeployContract(out string address)
         {
+            web3 = new Web3("http://127.0.0.1:8545");
+            accounts = web3.Personal.ListAccounts.SendRequestAsync().Result;
             File.Delete("Auction.abi");
             File.Delete("Auction.bin");
             Process.Start(".\\solc.exe", " --abi --bin -o .\\ .\\Auction.sol").WaitForExit();
             var contractABI = File.ReadAllText("Auction.abi");
             var contractBIN = File.ReadAllText("Auction.bin");
-            TransactionReceipt receipt = await web3.Eth.DeployContract.SendRequestAndWaitForReceiptAsync(contractABI, contractBIN, accounts[0], new HexBigInteger(3000000), new HexBigInteger(1), new HexBigInteger(0), null);
+            var receipt = web3.Eth.DeployContract.SendRequestAndWaitForReceiptAsync(contractABI, contractBIN, accounts[0], new HexBigInteger(3000000), new HexBigInteger(1), new HexBigInteger(0), null).Result;
             auctionContract = web3.Eth.GetContract(contractABI, receipt.ContractAddress);
-            return receipt.ContractAddress;
+            address = receipt.ContractAddress;
+            return receipt.GasUsed.Value;
         }
-        public static async Task<BigInteger> StartAuction(string enclaveAddress, byte[] enclavePublicKey, BigInteger t1, BigInteger t2, BigInteger t3, BigInteger t4, int _d)
+        public static BigInteger StartAuction(string enclaveAddress, byte[] enclavePublicKey, BigInteger t1, BigInteger t2, BigInteger t3, int _d)
         {
             initialDeposit = UnitConversion.Convert.ToWei(_d, UnitConversion.EthUnit.Ether);
-            var receipt = await auctionContract.GetFunction("StartAuction").SendTransactionAndWaitForReceiptAsync(accounts[0], new HexBigInteger(5000000), new HexBigInteger(1), new HexBigInteger(initialDeposit), null, enclaveAddress, enclavePublicKey, t1, t2, t3, t4, initialDeposit);
-            return receipt.BlockNumber.Value;
+            var receipt = auctionContract.GetFunction("StartAuction").SendTransactionAndWaitForReceiptAsync(accounts[0], new HexBigInteger(5000000), new HexBigInteger(1), new HexBigInteger(initialDeposit), null, enclaveAddress, enclavePublicKey, t1, t2, t3, initialDeposit).Result;
+            return receipt.GasUsed.Value;
         }
-        public static async Task SubmitBidAsync(string from, byte[] bidCT, byte[] bidPK)
+        public static BigInteger SubmitBid(int from, byte[] bidCT, byte[] bidPK)
         {
-            await auctionContract.GetFunction("SubmitBid").SendTransactionAndWaitForReceiptAsync(from, new HexBigInteger(5000000), new HexBigInteger(1), new HexBigInteger(initialDeposit), null, bidCT, bidPK);
+            return auctionContract.GetFunction("SubmitBid").SendTransactionAndWaitForReceiptAsync(accounts[from], new HexBigInteger(5000000), new HexBigInteger(1), new HexBigInteger(initialDeposit), null, bidCT, bidPK).Result.GasUsed.Value;
         }
-        public static async Task<byte[]> RetrieveSealedBidsAsync(string skip)
+        public static byte[] RetrieveSealedBids()
         {
             int count = auctionContract.GetFunction("GetLength").CallAsync<int>().Result;
             byte[] contractAddress = BigInteger.Parse(auctionContract.Address.Substring(2), System.Globalization.NumberStyles.AllowHexSpecifier).ToByteArray().Reverse().ToArray();
@@ -89,33 +92,20 @@ namespace UI
             byte[] bid;
             for (int i = 0; i < count; i++)
             {
-                bid = await auctionContract.GetFunction("bids").CallAsync<byte[]>(i);
-                if ((1+i) % 3 == 0)
-                {
-                    byte[] bAddress = new byte[20];
-                    Array.Copy(bid, 12, bAddress, 0, 20);
-                    string address ="0x"+ BitConverter.ToString(bAddress).Replace("-", "").ToLower();
-                    if(address == skip)
-                    {
-                        lstcipher.RemoveRange(lstcipher.Count - 64, 64);
-                        continue;
-                    }
-                }
+                bid = auctionContract.GetFunction("bids").CallAsync<byte[]>(i).Result;
                 lstcipher.AddRange(bid);
             }
             return lstcipher.ToArray();
         }
-        public static async Task SendRawTransaction(byte[] rawTransaction)
+        public static void SendRawTransaction(byte[] rawTransaction)
         {
             string tx = BitConverter.ToString(rawTransaction).Replace("-", "");
-            await web3.Eth.Transactions.SendRawTransaction.SendRequestAsync(tx);
+            web3.Eth.Transactions.SendRawTransaction.SendRequestAsync(tx).Wait();
         }
-        public static async Task<AccountInfo> WhoIsTheWinner()
+        public static uint WhoIsTheWinner(out string address)
         {
-            AccountInfo af = new UI.AccountInfo();
-            af.Address= await auctionContract.GetFunction("WinnerAddress").CallAsync<string>();
-            af.Balance= await auctionContract.GetFunction("WinnerBid").CallAsync<uint>();
-            return af;
+            address = auctionContract.GetFunction("WinnerAddress").CallAsync<string>().Result;
+            return auctionContract.GetFunction("WinnerBid").CallAsync<uint>().Result;
         }
         public static async Task<uint> Dispute(string from)
         {
@@ -123,13 +113,14 @@ namespace UI
             await Delay();
             return await auctionContract.GetFunction("state").CallAsync<uint>();
         }
-        public static async Task Withdraw(string from)
+        public static BigInteger Refund(int from)
         {
-            await auctionContract.GetFunction("Refund").SendTransactionAndWaitForReceiptAsync(from, new HexBigInteger(5000000), new HexBigInteger(1), new HexBigInteger(0));
+            var receipt = auctionContract.GetFunction("Refund").SendTransactionAndWaitForReceiptAsync(accounts[from], new HexBigInteger(5000000), new HexBigInteger(1), new HexBigInteger(0)).Result;
+            return receipt.GasUsed.Value;
         }
-        public static async Task Finalize()
+        public static BigInteger Reset()
         {
-            await auctionContract.GetFunction("Reset").SendTransactionAndWaitForReceiptAsync(accounts[0], new HexBigInteger(5000000), new HexBigInteger(1), new HexBigInteger(0));
+            return auctionContract.GetFunction("Reset").SendTransactionAndWaitForReceiptAsync(accounts[0], new HexBigInteger(5000000), new HexBigInteger(1), new HexBigInteger(0)).Result.GasUsed.Value;
         }
         public static uint GetContractState()
         {

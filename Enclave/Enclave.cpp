@@ -32,13 +32,13 @@ void Encrypt(uint8_t sgxPK[32], uint32_t bid, uint8_t bidPK[32], uint8_t bidCT[3
 	mbedtls_ecdh_free(&bidDH);
 }
 
-uint32_t Decrypt(mbedtls_ecdh_context& ctxDH, uint8_t* cipherText, uint8_t bidAddress[32])
+uint32_t Decrypt(mbedtls_ecdh_context& ctxDH, uint8_t* cipherText)
 {
 	sgx_aes_gcm_128bit_tag_t* tag = (sgx_aes_gcm_128bit_tag_t *)cipherText;
 	uint8_t* iv = cipherText + SGX_AESGCM_MAC_SIZE;
 	uint8_t* bidCipher = cipherText + SGX_AESGCM_MAC_SIZE+ SGX_AESGCM_IV_SIZE;
 	uint8_t* bidDhPublicKey = cipherText + 32;
-	memcpy(bidAddress, cipherText + 64, 32);
+
 
 	uint8_t key[32];
 	uint32_t value = 0;
@@ -62,7 +62,7 @@ void Sign(mbedtls_ecdsa_context& ctxDSA, const uint8_t *data, size_t in_len, uin
 	mbedtls_mpi_free(&r);
 	mbedtls_mpi_free(&s);
 }
-void CreateTransaction(mbedtls_ecdsa_context& ctxDSA, uint8_t contractAddress[20], uint8_t inputHash[32], uint8_t winnerAddress[32], uint32_t winnerBid, uint8_t transaction[512], size_t* transactionLen)
+void CreateTransaction(mbedtls_ecdsa_context& ctxDSA, uint8_t contractAddress[20], uint8_t inputHash[32], uint32_t winnerIndex, uint32_t winnerBid, uint8_t transaction[512], size_t* transactionLen)
 {
 	std::vector<uint8_t> tx;
 	//empty nonce = 80
@@ -87,15 +87,17 @@ void CreateTransaction(mbedtls_ecdsa_context& ctxDSA, uint8_t contractAddress[20
 	tx.push_back(0xB8);
 	tx.push_back(0x64);
 
-	//selector 7471187a
-	uint8_t functionSelector[] = { '\x74', '\x71', '\x18', '\x7a' };
+	//selector b698b9fd
+	uint8_t functionSelector[] = { '\xB6', '\x98', '\xB9', '\xFD' };
 	for (int i = 0; i < sizeof(functionSelector); i++)
 		tx.push_back(functionSelector[i]);
 	//input hash 
 	for (int i = 0; i < 32; i++)
 		tx.push_back(inputHash[i]);
-	//winner address	
-	tx.insert(tx.end(), winnerAddress, &winnerAddress[32]);
+	//winner index
+	tx.insert(tx.end(), 28, 0);
+	for (int i = 3; i >= 0; i--)
+		tx.push_back((uint8_t)(winnerIndex >> (8 * i)));
 	//winner bid
 	tx.insert(tx.end(), 28, 0);
 	for (int i = 3; i >= 0; i--)
@@ -140,29 +142,28 @@ bool RecoverContexts(sgx_sealed_data_t *sealed, size_t sealedLen, mbedtls_ecdh_c
 	mbedtls_ecp_mul(&ctxDSA.grp, &ctxDSA.Q, &ctxDSA.d, &ctxDSA.grp.G, NULL, NULL);
 	return true;
 }
-void GetWinner(mbedtls_ecdh_context& ctxDH, uint8_t* cipher, size_t cipherLen, uint32_t* winnerBid, uint8_t winnerAddress[32])
+void GetWinner(mbedtls_ecdh_context& ctxDH, uint8_t* cipher, size_t cipherLen, uint32_t* winnerBid, uint32_t* winnerIndex)
 {
 	uint32_t temp;
-	uint8_t bidAddress[32];
-	int count = cipherLen / 96;
+	int count = cipherLen / 64;
 	for (int i = 0; i < count; i++)
 	{
-		temp = Decrypt(ctxDH, cipher + i * 96,bidAddress);
+		temp = Decrypt(ctxDH, cipher + i * 64);
 		if (temp > *winnerBid)
 		{
 			*winnerBid = temp;
-			memcpy(winnerAddress, bidAddress, 32);
+			*winnerIndex = i;
 		}
 	}
 }
+
+
 
 void EnclaveStart(sgx_sealed_data_t *sealed, size_t sealedSize, size_t* sealedLen, uint8_t sgxAddress[20], uint8_t dhPublicKey[32])
 {
 	mbedtls_ecdsa_context ctxDSA;
 	mbedtls_ecdh_context ctxDH;
 	uint8_t secret[64], tmpDHPublicKey[32], tmpDSAPublicKey[65], tmpSGXAddress[32];
-	char buff[100];
-	size_t tmpLen;
 
 	//init DH key-pair
 	mbedtls_ecdh_init(&ctxDH);
@@ -202,7 +203,7 @@ void EnclaveGetAuctionWinner(sgx_sealed_data_t *sealed, size_t sealedLen, uint8_
 	mbedtls_ecdh_context ctxDH;
 	mbedtls_ecdsa_context ctxDSA;
 	uint32_t winnerBid=0;
-	uint8_t winnerAddress[32];
+	uint32_t winnerIndex;
 	uint8_t inputHash[32];
 
 	if (!RecoverContexts(sealed, sealedLen, ctxDH, ctxDSA))
@@ -210,9 +211,9 @@ void EnclaveGetAuctionWinner(sgx_sealed_data_t *sealed, size_t sealedLen, uint8_
 		*transactionLen = 0;
 		return;
 	}
-	GetWinner(ctxDH, cipher, cipherLen, &winnerBid, winnerAddress);
+	GetWinner(ctxDH, cipher, cipherLen, &winnerBid, &winnerIndex);
 	keccak(cipher, cipherLen, inputHash, 32);
-	CreateTransaction(ctxDSA, contractAddress, inputHash, winnerAddress, winnerBid, transaction, transactionLen);
+	CreateTransaction(ctxDSA, contractAddress, inputHash, winnerIndex, winnerBid, transaction, transactionLen);
 	
 	mbedtls_ecdh_free(&ctxDH);
 	mbedtls_ecdsa_free(&ctxDSA);
