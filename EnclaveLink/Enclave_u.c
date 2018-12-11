@@ -29,16 +29,16 @@ typedef struct ms_EnclaveGetAuctionWinner_t {
 typedef struct ms_ocall_mbedtls_net_connect_t {
 	int ms_retval;
 	mbedtls_net_context* ms_ctx;
-	char* ms_host;
-	char* ms_port;
+	const char* ms_host;
+	const char* ms_port;
 	int ms_proto;
 } ms_ocall_mbedtls_net_connect_t;
 
 typedef struct ms_ocall_mbedtls_net_bind_t {
 	int ms_retval;
 	mbedtls_net_context* ms_ctx;
-	char* ms_bind_ip;
-	char* ms_port;
+	const char* ms_bind_ip;
+	const char* ms_port;
 	int ms_proto;
 } ms_ocall_mbedtls_net_bind_t;
 
@@ -75,7 +75,7 @@ typedef struct ms_ocall_mbedtls_net_recv_t {
 typedef struct ms_ocall_mbedtls_net_send_t {
 	int ms_retval;
 	mbedtls_net_context* ms_ctx;
-	unsigned char* ms_buf;
+	const unsigned char* ms_buf;
 	size_t ms_len;
 } ms_ocall_mbedtls_net_send_t;
 
@@ -93,13 +93,13 @@ typedef struct ms_ocall_mbedtls_net_free_t {
 
 typedef struct ms_ocall_print_string_t {
 	int ms_retval;
-	char* ms_str;
+	const char* ms_str;
 } ms_ocall_print_string_t;
 
 static sgx_status_t SGX_CDECL Enclave_ocall_mbedtls_net_connect(void* pms)
 {
 	ms_ocall_mbedtls_net_connect_t* ms = SGX_CAST(ms_ocall_mbedtls_net_connect_t*, pms);
-	ms->ms_retval = ocall_mbedtls_net_connect(ms->ms_ctx, (const char*)ms->ms_host, (const char*)ms->ms_port, ms->ms_proto);
+	ms->ms_retval = ocall_mbedtls_net_connect(ms->ms_ctx, ms->ms_host, ms->ms_port, ms->ms_proto);
 
 	return SGX_SUCCESS;
 }
@@ -107,7 +107,7 @@ static sgx_status_t SGX_CDECL Enclave_ocall_mbedtls_net_connect(void* pms)
 static sgx_status_t SGX_CDECL Enclave_ocall_mbedtls_net_bind(void* pms)
 {
 	ms_ocall_mbedtls_net_bind_t* ms = SGX_CAST(ms_ocall_mbedtls_net_bind_t*, pms);
-	ms->ms_retval = ocall_mbedtls_net_bind(ms->ms_ctx, (const char*)ms->ms_bind_ip, (const char*)ms->ms_port, ms->ms_proto);
+	ms->ms_retval = ocall_mbedtls_net_bind(ms->ms_ctx, ms->ms_bind_ip, ms->ms_port, ms->ms_proto);
 
 	return SGX_SUCCESS;
 }
@@ -155,7 +155,7 @@ static sgx_status_t SGX_CDECL Enclave_ocall_mbedtls_net_recv(void* pms)
 static sgx_status_t SGX_CDECL Enclave_ocall_mbedtls_net_send(void* pms)
 {
 	ms_ocall_mbedtls_net_send_t* ms = SGX_CAST(ms_ocall_mbedtls_net_send_t*, pms);
-	ms->ms_retval = ocall_mbedtls_net_send(ms->ms_ctx, (const unsigned char*)ms->ms_buf, ms->ms_len);
+	ms->ms_retval = ocall_mbedtls_net_send(ms->ms_ctx, ms->ms_buf, ms->ms_len);
 
 	return SGX_SUCCESS;
 }
@@ -179,7 +179,7 @@ static sgx_status_t SGX_CDECL Enclave_ocall_mbedtls_net_free(void* pms)
 static sgx_status_t SGX_CDECL Enclave_ocall_print_string(void* pms)
 {
 	ms_ocall_print_string_t* ms = SGX_CAST(ms_ocall_print_string_t*, pms);
-	ms->ms_retval = ocall_print_string((const char*)ms->ms_str);
+	ms->ms_retval = ocall_print_string(ms->ms_str);
 
 	return SGX_SUCCESS;
 }

@@ -4,7 +4,7 @@
 #include "sgx_lfence.h" /* for sgx_lfence */
 
 #include <errno.h>
-#include <string.h> /* for memcpy etc */
+#include <mbusafecrt.h> /* for memcpy_s etc */
 #include <stdlib.h> /* for malloc/free etc */
 
 #define CHECK_REF_POINTER(ptr, siz) do {	\
@@ -14,6 +14,11 @@
 
 #define CHECK_UNIQUE_POINTER(ptr, siz) do {	\
 	if ((ptr) && ! sgx_is_outside_enclave((ptr), (siz)))	\
+		return SGX_ERROR_INVALID_PARAMETER;\
+} while (0)
+
+#define CHECK_ENCLAVE_POINTER(ptr, siz) do {	\
+	if ((ptr) && ! sgx_is_within_enclave((ptr), (siz)))	\
 		return SGX_ERROR_INVALID_PARAMETER;\
 } while (0)
 
@@ -46,16 +51,16 @@ typedef struct ms_EnclaveGetAuctionWinner_t {
 typedef struct ms_ocall_mbedtls_net_connect_t {
 	int ms_retval;
 	mbedtls_net_context* ms_ctx;
-	char* ms_host;
-	char* ms_port;
+	const char* ms_host;
+	const char* ms_port;
 	int ms_proto;
 } ms_ocall_mbedtls_net_connect_t;
 
 typedef struct ms_ocall_mbedtls_net_bind_t {
 	int ms_retval;
 	mbedtls_net_context* ms_ctx;
-	char* ms_bind_ip;
-	char* ms_port;
+	const char* ms_bind_ip;
+	const char* ms_port;
 	int ms_proto;
 } ms_ocall_mbedtls_net_bind_t;
 
@@ -92,7 +97,7 @@ typedef struct ms_ocall_mbedtls_net_recv_t {
 typedef struct ms_ocall_mbedtls_net_send_t {
 	int ms_retval;
 	mbedtls_net_context* ms_ctx;
-	unsigned char* ms_buf;
+	const unsigned char* ms_buf;
 	size_t ms_len;
 } ms_ocall_mbedtls_net_send_t;
 
@@ -110,7 +115,7 @@ typedef struct ms_ocall_mbedtls_net_free_t {
 
 typedef struct ms_ocall_print_string_t {
 	int ms_retval;
-	char* ms_str;
+	const char* ms_str;
 } ms_ocall_print_string_t;
 
 #ifdef _MSC_VER
@@ -129,13 +134,13 @@ static sgx_status_t SGX_CDECL sgx_Encrypt(void* pms)
 	ms_Encrypt_t* ms = SGX_CAST(ms_Encrypt_t*, pms);
 	sgx_status_t status = SGX_SUCCESS;
 	uint8_t* _tmp_sgxPK = ms->ms_sgxPK;
-	size_t _len_sgxPK = 32 * sizeof(*_tmp_sgxPK);
+	size_t _len_sgxPK = 32 * sizeof(uint8_t);
 	uint8_t* _in_sgxPK = NULL;
 	uint8_t* _tmp_bidPK = ms->ms_bidPK;
-	size_t _len_bidPK = 32 * sizeof(*_tmp_bidPK);
+	size_t _len_bidPK = 32 * sizeof(uint8_t);
 	uint8_t* _in_bidPK = NULL;
 	uint8_t* _tmp_bidCT = ms->ms_bidCT;
-	size_t _len_bidCT = 32 * sizeof(*_tmp_bidCT);
+	size_t _len_bidCT = 32 * sizeof(uint8_t);
 	uint8_t* _in_bidCT = NULL;
 
 	CHECK_UNIQUE_POINTER(_tmp_sgxPK, _len_sgxPK);
@@ -154,7 +159,11 @@ static sgx_status_t SGX_CDECL sgx_Encrypt(void* pms)
 			goto err;
 		}
 
-		memcpy(_in_sgxPK, _tmp_sgxPK, _len_sgxPK);
+		if (memcpy_s(_in_sgxPK, _len_sgxPK, _tmp_sgxPK, _len_sgxPK)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+
 	}
 	if (_tmp_bidPK != NULL && _len_bidPK != 0) {
 		if ((_in_bidPK = (uint8_t*)malloc(_len_bidPK)) == NULL) {
@@ -177,11 +186,15 @@ static sgx_status_t SGX_CDECL sgx_Encrypt(void* pms)
 err:
 	if (_in_sgxPK) free(_in_sgxPK);
 	if (_in_bidPK) {
-		memcpy(_tmp_bidPK, _in_bidPK, _len_bidPK);
+		if (memcpy_s(_tmp_bidPK, _len_bidPK, _in_bidPK, _len_bidPK)) {
+			status = SGX_ERROR_UNEXPECTED;
+		}
 		free(_in_bidPK);
 	}
 	if (_in_bidCT) {
-		memcpy(_tmp_bidCT, _in_bidCT, _len_bidCT);
+		if (memcpy_s(_tmp_bidCT, _len_bidCT, _in_bidCT, _len_bidCT)) {
+			status = SGX_ERROR_UNEXPECTED;
+		}
 		free(_in_bidCT);
 	}
 
@@ -202,13 +215,13 @@ static sgx_status_t SGX_CDECL sgx_EnclaveStart(void* pms)
 	size_t _len_sealed = _tmp_sealedSize;
 	sgx_sealed_data_t* _in_sealed = NULL;
 	size_t* _tmp_sealedLen = ms->ms_sealedLen;
-	size_t _len_sealedLen = sizeof(*_tmp_sealedLen);
+	size_t _len_sealedLen = sizeof(size_t);
 	size_t* _in_sealedLen = NULL;
 	uint8_t* _tmp_address = ms->ms_address;
-	size_t _len_address = 20 * sizeof(*_tmp_address);
+	size_t _len_address = 20 * sizeof(uint8_t);
 	uint8_t* _in_address = NULL;
 	uint8_t* _tmp_dhPublicKey = ms->ms_dhPublicKey;
-	size_t _len_dhPublicKey = 32 * sizeof(*_tmp_dhPublicKey);
+	size_t _len_dhPublicKey = 32 * sizeof(uint8_t);
 	uint8_t* _in_dhPublicKey = NULL;
 
 	CHECK_UNIQUE_POINTER(_tmp_sealed, _len_sealed);
@@ -257,19 +270,27 @@ static sgx_status_t SGX_CDECL sgx_EnclaveStart(void* pms)
 	EnclaveStart(_in_sealed, _tmp_sealedSize, _in_sealedLen, _in_address, _in_dhPublicKey);
 err:
 	if (_in_sealed) {
-		memcpy(_tmp_sealed, _in_sealed, _len_sealed);
+		if (memcpy_s(_tmp_sealed, _len_sealed, _in_sealed, _len_sealed)) {
+			status = SGX_ERROR_UNEXPECTED;
+		}
 		free(_in_sealed);
 	}
 	if (_in_sealedLen) {
-		memcpy(_tmp_sealedLen, _in_sealedLen, _len_sealedLen);
+		if (memcpy_s(_tmp_sealedLen, _len_sealedLen, _in_sealedLen, _len_sealedLen)) {
+			status = SGX_ERROR_UNEXPECTED;
+		}
 		free(_in_sealedLen);
 	}
 	if (_in_address) {
-		memcpy(_tmp_address, _in_address, _len_address);
+		if (memcpy_s(_tmp_address, _len_address, _in_address, _len_address)) {
+			status = SGX_ERROR_UNEXPECTED;
+		}
 		free(_in_address);
 	}
 	if (_in_dhPublicKey) {
-		memcpy(_tmp_dhPublicKey, _in_dhPublicKey, _len_dhPublicKey);
+		if (memcpy_s(_tmp_dhPublicKey, _len_dhPublicKey, _in_dhPublicKey, _len_dhPublicKey)) {
+			status = SGX_ERROR_UNEXPECTED;
+		}
 		free(_in_dhPublicKey);
 	}
 
@@ -294,13 +315,13 @@ static sgx_status_t SGX_CDECL sgx_EnclaveGetAuctionWinner(void* pms)
 	size_t _len_cipher = _tmp_cipherLen;
 	uint8_t* _in_cipher = NULL;
 	uint8_t* _tmp_contractAddress = ms->ms_contractAddress;
-	size_t _len_contractAddress = 20 * sizeof(*_tmp_contractAddress);
+	size_t _len_contractAddress = 20 * sizeof(uint8_t);
 	uint8_t* _in_contractAddress = NULL;
 	uint8_t* _tmp_transaction = ms->ms_transaction;
-	size_t _len_transaction = 512 * sizeof(*_tmp_transaction);
+	size_t _len_transaction = 512 * sizeof(uint8_t);
 	uint8_t* _in_transaction = NULL;
 	size_t* _tmp_transactionLen = ms->ms_transactionLen;
-	size_t _len_transactionLen = sizeof(*_tmp_transactionLen);
+	size_t _len_transactionLen = sizeof(size_t);
 	size_t* _in_transactionLen = NULL;
 
 	CHECK_UNIQUE_POINTER(_tmp_sealed, _len_sealed);
@@ -321,7 +342,11 @@ static sgx_status_t SGX_CDECL sgx_EnclaveGetAuctionWinner(void* pms)
 			goto err;
 		}
 
-		memcpy(_in_sealed, _tmp_sealed, _len_sealed);
+		if (memcpy_s(_in_sealed, _len_sealed, _tmp_sealed, _len_sealed)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+
 	}
 	if (_tmp_cipher != NULL && _len_cipher != 0) {
 		_in_cipher = (uint8_t*)malloc(_len_cipher);
@@ -330,7 +355,11 @@ static sgx_status_t SGX_CDECL sgx_EnclaveGetAuctionWinner(void* pms)
 			goto err;
 		}
 
-		memcpy(_in_cipher, _tmp_cipher, _len_cipher);
+		if (memcpy_s(_in_cipher, _len_cipher, _tmp_cipher, _len_cipher)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+
 	}
 	if (_tmp_contractAddress != NULL && _len_contractAddress != 0) {
 		_in_contractAddress = (uint8_t*)malloc(_len_contractAddress);
@@ -339,7 +368,11 @@ static sgx_status_t SGX_CDECL sgx_EnclaveGetAuctionWinner(void* pms)
 			goto err;
 		}
 
-		memcpy(_in_contractAddress, _tmp_contractAddress, _len_contractAddress);
+		if (memcpy_s(_in_contractAddress, _len_contractAddress, _tmp_contractAddress, _len_contractAddress)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+
 	}
 	if (_tmp_transaction != NULL && _len_transaction != 0) {
 		if ((_in_transaction = (uint8_t*)malloc(_len_transaction)) == NULL) {
@@ -364,11 +397,15 @@ err:
 	if (_in_cipher) free(_in_cipher);
 	if (_in_contractAddress) free(_in_contractAddress);
 	if (_in_transaction) {
-		memcpy(_tmp_transaction, _in_transaction, _len_transaction);
+		if (memcpy_s(_tmp_transaction, _len_transaction, _in_transaction, _len_transaction)) {
+			status = SGX_ERROR_UNEXPECTED;
+		}
 		free(_in_transaction);
 	}
 	if (_in_transactionLen) {
-		memcpy(_tmp_transactionLen, _in_transactionLen, _len_transactionLen);
+		if (memcpy_s(_tmp_transactionLen, _len_transactionLen, _in_transactionLen, _len_transactionLen)) {
+			status = SGX_ERROR_UNEXPECTED;
+		}
 		free(_in_transactionLen);
 	}
 
@@ -411,7 +448,7 @@ SGX_EXTERNC const struct {
 sgx_status_t SGX_CDECL ocall_mbedtls_net_connect(int* retval, mbedtls_net_context* ctx, const char* host, const char* port, int proto)
 {
 	sgx_status_t status = SGX_SUCCESS;
-	size_t _len_ctx = sizeof(*ctx);
+	size_t _len_ctx = sizeof(mbedtls_net_context);
 	size_t _len_host = host ? strlen(host) + 1 : 0;
 	size_t _len_port = port ? strlen(port) + 1 : 0;
 
@@ -420,9 +457,14 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_connect(int* retval, mbedtls_net_contex
 	void *__tmp = NULL;
 
 	void *__tmp_ctx = NULL;
-	ocalloc_size += (ctx != NULL && sgx_is_within_enclave(ctx, _len_ctx)) ? _len_ctx : 0;
-	ocalloc_size += (host != NULL && sgx_is_within_enclave(host, _len_host)) ? _len_host : 0;
-	ocalloc_size += (port != NULL && sgx_is_within_enclave(port, _len_port)) ? _len_port : 0;
+
+	CHECK_ENCLAVE_POINTER(ctx, _len_ctx);
+	CHECK_ENCLAVE_POINTER(host, _len_host);
+	CHECK_ENCLAVE_POINTER(port, _len_port);
+
+	ocalloc_size += (ctx != NULL) ? _len_ctx : 0;
+	ocalloc_size += (host != NULL) ? _len_host : 0;
+	ocalloc_size += (port != NULL) ? _len_port : 0;
 
 	__tmp = sgx_ocalloc(ocalloc_size);
 	if (__tmp == NULL) {
@@ -431,39 +473,43 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_connect(int* retval, mbedtls_net_contex
 	}
 	ms = (ms_ocall_mbedtls_net_connect_t*)__tmp;
 	__tmp = (void *)((size_t)__tmp + sizeof(ms_ocall_mbedtls_net_connect_t));
+	ocalloc_size -= sizeof(ms_ocall_mbedtls_net_connect_t);
 
-	if (ctx != NULL && sgx_is_within_enclave(ctx, _len_ctx)) {
+	if (ctx != NULL) {
 		ms->ms_ctx = (mbedtls_net_context*)__tmp;
 		__tmp_ctx = __tmp;
-		memcpy(__tmp_ctx, ctx, _len_ctx);
+		if (memcpy_s(__tmp_ctx, ocalloc_size, ctx, _len_ctx)) {
+			sgx_ocfree();
+			return SGX_ERROR_UNEXPECTED;
+		}
 		__tmp = (void *)((size_t)__tmp + _len_ctx);
-	} else if (ctx == NULL) {
+		ocalloc_size -= _len_ctx;
+	} else {
 		ms->ms_ctx = NULL;
-	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
 	}
 	
-	if (host != NULL && sgx_is_within_enclave(host, _len_host)) {
-		ms->ms_host = (char*)__tmp;
-		memcpy(__tmp, host, _len_host);
+	if (host != NULL) {
+		ms->ms_host = (const char*)__tmp;
+		if (memcpy_s(__tmp, ocalloc_size, host, _len_host)) {
+			sgx_ocfree();
+			return SGX_ERROR_UNEXPECTED;
+		}
 		__tmp = (void *)((size_t)__tmp + _len_host);
-	} else if (host == NULL) {
-		ms->ms_host = NULL;
+		ocalloc_size -= _len_host;
 	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
+		ms->ms_host = NULL;
 	}
 	
-	if (port != NULL && sgx_is_within_enclave(port, _len_port)) {
-		ms->ms_port = (char*)__tmp;
-		memcpy(__tmp, port, _len_port);
+	if (port != NULL) {
+		ms->ms_port = (const char*)__tmp;
+		if (memcpy_s(__tmp, ocalloc_size, port, _len_port)) {
+			sgx_ocfree();
+			return SGX_ERROR_UNEXPECTED;
+		}
 		__tmp = (void *)((size_t)__tmp + _len_port);
-	} else if (port == NULL) {
-		ms->ms_port = NULL;
+		ocalloc_size -= _len_port;
 	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
+		ms->ms_port = NULL;
 	}
 	
 	ms->ms_proto = proto;
@@ -471,7 +517,12 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_connect(int* retval, mbedtls_net_contex
 
 	if (status == SGX_SUCCESS) {
 		if (retval) *retval = ms->ms_retval;
-		if (ctx) memcpy((void*)ctx, __tmp_ctx, _len_ctx);
+		if (ctx) {
+			if (memcpy_s((void*)ctx, _len_ctx, __tmp_ctx, _len_ctx)) {
+				sgx_ocfree();
+				return SGX_ERROR_UNEXPECTED;
+			}
+		}
 	}
 	sgx_ocfree();
 	return status;
@@ -480,7 +531,7 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_connect(int* retval, mbedtls_net_contex
 sgx_status_t SGX_CDECL ocall_mbedtls_net_bind(int* retval, mbedtls_net_context* ctx, const char* bind_ip, const char* port, int proto)
 {
 	sgx_status_t status = SGX_SUCCESS;
-	size_t _len_ctx = sizeof(*ctx);
+	size_t _len_ctx = sizeof(mbedtls_net_context);
 	size_t _len_bind_ip = bind_ip ? strlen(bind_ip) + 1 : 0;
 	size_t _len_port = port ? strlen(port) + 1 : 0;
 
@@ -489,9 +540,14 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_bind(int* retval, mbedtls_net_context* 
 	void *__tmp = NULL;
 
 	void *__tmp_ctx = NULL;
-	ocalloc_size += (ctx != NULL && sgx_is_within_enclave(ctx, _len_ctx)) ? _len_ctx : 0;
-	ocalloc_size += (bind_ip != NULL && sgx_is_within_enclave(bind_ip, _len_bind_ip)) ? _len_bind_ip : 0;
-	ocalloc_size += (port != NULL && sgx_is_within_enclave(port, _len_port)) ? _len_port : 0;
+
+	CHECK_ENCLAVE_POINTER(ctx, _len_ctx);
+	CHECK_ENCLAVE_POINTER(bind_ip, _len_bind_ip);
+	CHECK_ENCLAVE_POINTER(port, _len_port);
+
+	ocalloc_size += (ctx != NULL) ? _len_ctx : 0;
+	ocalloc_size += (bind_ip != NULL) ? _len_bind_ip : 0;
+	ocalloc_size += (port != NULL) ? _len_port : 0;
 
 	__tmp = sgx_ocalloc(ocalloc_size);
 	if (__tmp == NULL) {
@@ -500,39 +556,40 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_bind(int* retval, mbedtls_net_context* 
 	}
 	ms = (ms_ocall_mbedtls_net_bind_t*)__tmp;
 	__tmp = (void *)((size_t)__tmp + sizeof(ms_ocall_mbedtls_net_bind_t));
+	ocalloc_size -= sizeof(ms_ocall_mbedtls_net_bind_t);
 
-	if (ctx != NULL && sgx_is_within_enclave(ctx, _len_ctx)) {
+	if (ctx != NULL) {
 		ms->ms_ctx = (mbedtls_net_context*)__tmp;
 		__tmp_ctx = __tmp;
 		memset(__tmp_ctx, 0, _len_ctx);
 		__tmp = (void *)((size_t)__tmp + _len_ctx);
-	} else if (ctx == NULL) {
+		ocalloc_size -= _len_ctx;
+	} else {
 		ms->ms_ctx = NULL;
-	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
 	}
 	
-	if (bind_ip != NULL && sgx_is_within_enclave(bind_ip, _len_bind_ip)) {
-		ms->ms_bind_ip = (char*)__tmp;
-		memcpy(__tmp, bind_ip, _len_bind_ip);
+	if (bind_ip != NULL) {
+		ms->ms_bind_ip = (const char*)__tmp;
+		if (memcpy_s(__tmp, ocalloc_size, bind_ip, _len_bind_ip)) {
+			sgx_ocfree();
+			return SGX_ERROR_UNEXPECTED;
+		}
 		__tmp = (void *)((size_t)__tmp + _len_bind_ip);
-	} else if (bind_ip == NULL) {
-		ms->ms_bind_ip = NULL;
+		ocalloc_size -= _len_bind_ip;
 	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
+		ms->ms_bind_ip = NULL;
 	}
 	
-	if (port != NULL && sgx_is_within_enclave(port, _len_port)) {
-		ms->ms_port = (char*)__tmp;
-		memcpy(__tmp, port, _len_port);
+	if (port != NULL) {
+		ms->ms_port = (const char*)__tmp;
+		if (memcpy_s(__tmp, ocalloc_size, port, _len_port)) {
+			sgx_ocfree();
+			return SGX_ERROR_UNEXPECTED;
+		}
 		__tmp = (void *)((size_t)__tmp + _len_port);
-	} else if (port == NULL) {
-		ms->ms_port = NULL;
+		ocalloc_size -= _len_port;
 	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
+		ms->ms_port = NULL;
 	}
 	
 	ms->ms_proto = proto;
@@ -540,7 +597,12 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_bind(int* retval, mbedtls_net_context* 
 
 	if (status == SGX_SUCCESS) {
 		if (retval) *retval = ms->ms_retval;
-		if (ctx) memcpy((void*)ctx, __tmp_ctx, _len_ctx);
+		if (ctx) {
+			if (memcpy_s((void*)ctx, _len_ctx, __tmp_ctx, _len_ctx)) {
+				sgx_ocfree();
+				return SGX_ERROR_UNEXPECTED;
+			}
+		}
 	}
 	sgx_ocfree();
 	return status;
@@ -549,10 +611,10 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_bind(int* retval, mbedtls_net_context* 
 sgx_status_t SGX_CDECL ocall_mbedtls_net_accept(int* retval, mbedtls_net_context* bind_ctx, mbedtls_net_context* client_ctx, void* client_ip, size_t buf_size, size_t* ip_len)
 {
 	sgx_status_t status = SGX_SUCCESS;
-	size_t _len_bind_ctx = sizeof(*bind_ctx);
-	size_t _len_client_ctx = sizeof(*client_ctx);
+	size_t _len_bind_ctx = sizeof(mbedtls_net_context);
+	size_t _len_client_ctx = sizeof(mbedtls_net_context);
 	size_t _len_client_ip = buf_size;
-	size_t _len_ip_len = sizeof(*ip_len);
+	size_t _len_ip_len = sizeof(size_t);
 
 	ms_ocall_mbedtls_net_accept_t* ms = NULL;
 	size_t ocalloc_size = sizeof(ms_ocall_mbedtls_net_accept_t);
@@ -561,10 +623,16 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_accept(int* retval, mbedtls_net_context
 	void *__tmp_client_ctx = NULL;
 	void *__tmp_client_ip = NULL;
 	void *__tmp_ip_len = NULL;
-	ocalloc_size += (bind_ctx != NULL && sgx_is_within_enclave(bind_ctx, _len_bind_ctx)) ? _len_bind_ctx : 0;
-	ocalloc_size += (client_ctx != NULL && sgx_is_within_enclave(client_ctx, _len_client_ctx)) ? _len_client_ctx : 0;
-	ocalloc_size += (client_ip != NULL && sgx_is_within_enclave(client_ip, _len_client_ip)) ? _len_client_ip : 0;
-	ocalloc_size += (ip_len != NULL && sgx_is_within_enclave(ip_len, _len_ip_len)) ? _len_ip_len : 0;
+
+	CHECK_ENCLAVE_POINTER(bind_ctx, _len_bind_ctx);
+	CHECK_ENCLAVE_POINTER(client_ctx, _len_client_ctx);
+	CHECK_ENCLAVE_POINTER(client_ip, _len_client_ip);
+	CHECK_ENCLAVE_POINTER(ip_len, _len_ip_len);
+
+	ocalloc_size += (bind_ctx != NULL) ? _len_bind_ctx : 0;
+	ocalloc_size += (client_ctx != NULL) ? _len_client_ctx : 0;
+	ocalloc_size += (client_ip != NULL) ? _len_client_ip : 0;
+	ocalloc_size += (ip_len != NULL) ? _len_ip_len : 0;
 
 	__tmp = sgx_ocalloc(ocalloc_size);
 	if (__tmp == NULL) {
@@ -573,62 +641,73 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_accept(int* retval, mbedtls_net_context
 	}
 	ms = (ms_ocall_mbedtls_net_accept_t*)__tmp;
 	__tmp = (void *)((size_t)__tmp + sizeof(ms_ocall_mbedtls_net_accept_t));
+	ocalloc_size -= sizeof(ms_ocall_mbedtls_net_accept_t);
 
-	if (bind_ctx != NULL && sgx_is_within_enclave(bind_ctx, _len_bind_ctx)) {
+	if (bind_ctx != NULL) {
 		ms->ms_bind_ctx = (mbedtls_net_context*)__tmp;
-		memcpy(__tmp, bind_ctx, _len_bind_ctx);
+		if (memcpy_s(__tmp, ocalloc_size, bind_ctx, _len_bind_ctx)) {
+			sgx_ocfree();
+			return SGX_ERROR_UNEXPECTED;
+		}
 		__tmp = (void *)((size_t)__tmp + _len_bind_ctx);
-	} else if (bind_ctx == NULL) {
-		ms->ms_bind_ctx = NULL;
+		ocalloc_size -= _len_bind_ctx;
 	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
+		ms->ms_bind_ctx = NULL;
 	}
 	
-	if (client_ctx != NULL && sgx_is_within_enclave(client_ctx, _len_client_ctx)) {
+	if (client_ctx != NULL) {
 		ms->ms_client_ctx = (mbedtls_net_context*)__tmp;
 		__tmp_client_ctx = __tmp;
 		memset(__tmp_client_ctx, 0, _len_client_ctx);
 		__tmp = (void *)((size_t)__tmp + _len_client_ctx);
-	} else if (client_ctx == NULL) {
-		ms->ms_client_ctx = NULL;
+		ocalloc_size -= _len_client_ctx;
 	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
+		ms->ms_client_ctx = NULL;
 	}
 	
-	if (client_ip != NULL && sgx_is_within_enclave(client_ip, _len_client_ip)) {
+	if (client_ip != NULL) {
 		ms->ms_client_ip = (void*)__tmp;
 		__tmp_client_ip = __tmp;
 		memset(__tmp_client_ip, 0, _len_client_ip);
 		__tmp = (void *)((size_t)__tmp + _len_client_ip);
-	} else if (client_ip == NULL) {
-		ms->ms_client_ip = NULL;
+		ocalloc_size -= _len_client_ip;
 	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
+		ms->ms_client_ip = NULL;
 	}
 	
 	ms->ms_buf_size = buf_size;
-	if (ip_len != NULL && sgx_is_within_enclave(ip_len, _len_ip_len)) {
+	if (ip_len != NULL) {
 		ms->ms_ip_len = (size_t*)__tmp;
 		__tmp_ip_len = __tmp;
 		memset(__tmp_ip_len, 0, _len_ip_len);
 		__tmp = (void *)((size_t)__tmp + _len_ip_len);
-	} else if (ip_len == NULL) {
-		ms->ms_ip_len = NULL;
+		ocalloc_size -= _len_ip_len;
 	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
+		ms->ms_ip_len = NULL;
 	}
 	
 	status = sgx_ocall(2, ms);
 
 	if (status == SGX_SUCCESS) {
 		if (retval) *retval = ms->ms_retval;
-		if (client_ctx) memcpy((void*)client_ctx, __tmp_client_ctx, _len_client_ctx);
-		if (client_ip) memcpy((void*)client_ip, __tmp_client_ip, _len_client_ip);
-		if (ip_len) memcpy((void*)ip_len, __tmp_ip_len, _len_ip_len);
+		if (client_ctx) {
+			if (memcpy_s((void*)client_ctx, _len_client_ctx, __tmp_client_ctx, _len_client_ctx)) {
+				sgx_ocfree();
+				return SGX_ERROR_UNEXPECTED;
+			}
+		}
+		if (client_ip) {
+			if (memcpy_s((void*)client_ip, _len_client_ip, __tmp_client_ip, _len_client_ip)) {
+				sgx_ocfree();
+				return SGX_ERROR_UNEXPECTED;
+			}
+		}
+		if (ip_len) {
+			if (memcpy_s((void*)ip_len, _len_ip_len, __tmp_ip_len, _len_ip_len)) {
+				sgx_ocfree();
+				return SGX_ERROR_UNEXPECTED;
+			}
+		}
 	}
 	sgx_ocfree();
 	return status;
@@ -637,14 +716,17 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_accept(int* retval, mbedtls_net_context
 sgx_status_t SGX_CDECL ocall_mbedtls_net_set_block(int* retval, mbedtls_net_context* ctx)
 {
 	sgx_status_t status = SGX_SUCCESS;
-	size_t _len_ctx = sizeof(*ctx);
+	size_t _len_ctx = sizeof(mbedtls_net_context);
 
 	ms_ocall_mbedtls_net_set_block_t* ms = NULL;
 	size_t ocalloc_size = sizeof(ms_ocall_mbedtls_net_set_block_t);
 	void *__tmp = NULL;
 
 	void *__tmp_ctx = NULL;
-	ocalloc_size += (ctx != NULL && sgx_is_within_enclave(ctx, _len_ctx)) ? _len_ctx : 0;
+
+	CHECK_ENCLAVE_POINTER(ctx, _len_ctx);
+
+	ocalloc_size += (ctx != NULL) ? _len_ctx : 0;
 
 	__tmp = sgx_ocalloc(ocalloc_size);
 	if (__tmp == NULL) {
@@ -653,24 +735,31 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_set_block(int* retval, mbedtls_net_cont
 	}
 	ms = (ms_ocall_mbedtls_net_set_block_t*)__tmp;
 	__tmp = (void *)((size_t)__tmp + sizeof(ms_ocall_mbedtls_net_set_block_t));
+	ocalloc_size -= sizeof(ms_ocall_mbedtls_net_set_block_t);
 
-	if (ctx != NULL && sgx_is_within_enclave(ctx, _len_ctx)) {
+	if (ctx != NULL) {
 		ms->ms_ctx = (mbedtls_net_context*)__tmp;
 		__tmp_ctx = __tmp;
-		memcpy(__tmp_ctx, ctx, _len_ctx);
+		if (memcpy_s(__tmp_ctx, ocalloc_size, ctx, _len_ctx)) {
+			sgx_ocfree();
+			return SGX_ERROR_UNEXPECTED;
+		}
 		__tmp = (void *)((size_t)__tmp + _len_ctx);
-	} else if (ctx == NULL) {
-		ms->ms_ctx = NULL;
+		ocalloc_size -= _len_ctx;
 	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
+		ms->ms_ctx = NULL;
 	}
 	
 	status = sgx_ocall(3, ms);
 
 	if (status == SGX_SUCCESS) {
 		if (retval) *retval = ms->ms_retval;
-		if (ctx) memcpy((void*)ctx, __tmp_ctx, _len_ctx);
+		if (ctx) {
+			if (memcpy_s((void*)ctx, _len_ctx, __tmp_ctx, _len_ctx)) {
+				sgx_ocfree();
+				return SGX_ERROR_UNEXPECTED;
+			}
+		}
 	}
 	sgx_ocfree();
 	return status;
@@ -679,14 +768,17 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_set_block(int* retval, mbedtls_net_cont
 sgx_status_t SGX_CDECL ocall_mbedtls_net_set_nonblock(int* retval, mbedtls_net_context* ctx)
 {
 	sgx_status_t status = SGX_SUCCESS;
-	size_t _len_ctx = sizeof(*ctx);
+	size_t _len_ctx = sizeof(mbedtls_net_context);
 
 	ms_ocall_mbedtls_net_set_nonblock_t* ms = NULL;
 	size_t ocalloc_size = sizeof(ms_ocall_mbedtls_net_set_nonblock_t);
 	void *__tmp = NULL;
 
 	void *__tmp_ctx = NULL;
-	ocalloc_size += (ctx != NULL && sgx_is_within_enclave(ctx, _len_ctx)) ? _len_ctx : 0;
+
+	CHECK_ENCLAVE_POINTER(ctx, _len_ctx);
+
+	ocalloc_size += (ctx != NULL) ? _len_ctx : 0;
 
 	__tmp = sgx_ocalloc(ocalloc_size);
 	if (__tmp == NULL) {
@@ -695,24 +787,31 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_set_nonblock(int* retval, mbedtls_net_c
 	}
 	ms = (ms_ocall_mbedtls_net_set_nonblock_t*)__tmp;
 	__tmp = (void *)((size_t)__tmp + sizeof(ms_ocall_mbedtls_net_set_nonblock_t));
+	ocalloc_size -= sizeof(ms_ocall_mbedtls_net_set_nonblock_t);
 
-	if (ctx != NULL && sgx_is_within_enclave(ctx, _len_ctx)) {
+	if (ctx != NULL) {
 		ms->ms_ctx = (mbedtls_net_context*)__tmp;
 		__tmp_ctx = __tmp;
-		memcpy(__tmp_ctx, ctx, _len_ctx);
+		if (memcpy_s(__tmp_ctx, ocalloc_size, ctx, _len_ctx)) {
+			sgx_ocfree();
+			return SGX_ERROR_UNEXPECTED;
+		}
 		__tmp = (void *)((size_t)__tmp + _len_ctx);
-	} else if (ctx == NULL) {
-		ms->ms_ctx = NULL;
+		ocalloc_size -= _len_ctx;
 	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
+		ms->ms_ctx = NULL;
 	}
 	
 	status = sgx_ocall(4, ms);
 
 	if (status == SGX_SUCCESS) {
 		if (retval) *retval = ms->ms_retval;
-		if (ctx) memcpy((void*)ctx, __tmp_ctx, _len_ctx);
+		if (ctx) {
+			if (memcpy_s((void*)ctx, _len_ctx, __tmp_ctx, _len_ctx)) {
+				sgx_ocfree();
+				return SGX_ERROR_UNEXPECTED;
+			}
+		}
 	}
 	sgx_ocfree();
 	return status;
@@ -734,6 +833,7 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_usleep(unsigned long int usec)
 	}
 	ms = (ms_ocall_mbedtls_net_usleep_t*)__tmp;
 	__tmp = (void *)((size_t)__tmp + sizeof(ms_ocall_mbedtls_net_usleep_t));
+	ocalloc_size -= sizeof(ms_ocall_mbedtls_net_usleep_t);
 
 	ms->ms_usec = usec;
 	status = sgx_ocall(5, ms);
@@ -747,7 +847,7 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_usleep(unsigned long int usec)
 sgx_status_t SGX_CDECL ocall_mbedtls_net_recv(int* retval, mbedtls_net_context* ctx, unsigned char* buf, size_t len)
 {
 	sgx_status_t status = SGX_SUCCESS;
-	size_t _len_ctx = sizeof(*ctx);
+	size_t _len_ctx = sizeof(mbedtls_net_context);
 	size_t _len_buf = len;
 
 	ms_ocall_mbedtls_net_recv_t* ms = NULL;
@@ -756,8 +856,12 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_recv(int* retval, mbedtls_net_context* 
 
 	void *__tmp_ctx = NULL;
 	void *__tmp_buf = NULL;
-	ocalloc_size += (ctx != NULL && sgx_is_within_enclave(ctx, _len_ctx)) ? _len_ctx : 0;
-	ocalloc_size += (buf != NULL && sgx_is_within_enclave(buf, _len_buf)) ? _len_buf : 0;
+
+	CHECK_ENCLAVE_POINTER(ctx, _len_ctx);
+	CHECK_ENCLAVE_POINTER(buf, _len_buf);
+
+	ocalloc_size += (ctx != NULL) ? _len_ctx : 0;
+	ocalloc_size += (buf != NULL) ? _len_buf : 0;
 
 	__tmp = sgx_ocalloc(ocalloc_size);
 	if (__tmp == NULL) {
@@ -766,29 +870,29 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_recv(int* retval, mbedtls_net_context* 
 	}
 	ms = (ms_ocall_mbedtls_net_recv_t*)__tmp;
 	__tmp = (void *)((size_t)__tmp + sizeof(ms_ocall_mbedtls_net_recv_t));
+	ocalloc_size -= sizeof(ms_ocall_mbedtls_net_recv_t);
 
-	if (ctx != NULL && sgx_is_within_enclave(ctx, _len_ctx)) {
+	if (ctx != NULL) {
 		ms->ms_ctx = (mbedtls_net_context*)__tmp;
 		__tmp_ctx = __tmp;
-		memcpy(__tmp_ctx, ctx, _len_ctx);
+		if (memcpy_s(__tmp_ctx, ocalloc_size, ctx, _len_ctx)) {
+			sgx_ocfree();
+			return SGX_ERROR_UNEXPECTED;
+		}
 		__tmp = (void *)((size_t)__tmp + _len_ctx);
-	} else if (ctx == NULL) {
-		ms->ms_ctx = NULL;
+		ocalloc_size -= _len_ctx;
 	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
+		ms->ms_ctx = NULL;
 	}
 	
-	if (buf != NULL && sgx_is_within_enclave(buf, _len_buf)) {
+	if (buf != NULL) {
 		ms->ms_buf = (unsigned char*)__tmp;
 		__tmp_buf = __tmp;
 		memset(__tmp_buf, 0, _len_buf);
 		__tmp = (void *)((size_t)__tmp + _len_buf);
-	} else if (buf == NULL) {
-		ms->ms_buf = NULL;
+		ocalloc_size -= _len_buf;
 	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
+		ms->ms_buf = NULL;
 	}
 	
 	ms->ms_len = len;
@@ -796,8 +900,18 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_recv(int* retval, mbedtls_net_context* 
 
 	if (status == SGX_SUCCESS) {
 		if (retval) *retval = ms->ms_retval;
-		if (ctx) memcpy((void*)ctx, __tmp_ctx, _len_ctx);
-		if (buf) memcpy((void*)buf, __tmp_buf, _len_buf);
+		if (ctx) {
+			if (memcpy_s((void*)ctx, _len_ctx, __tmp_ctx, _len_ctx)) {
+				sgx_ocfree();
+				return SGX_ERROR_UNEXPECTED;
+			}
+		}
+		if (buf) {
+			if (memcpy_s((void*)buf, _len_buf, __tmp_buf, _len_buf)) {
+				sgx_ocfree();
+				return SGX_ERROR_UNEXPECTED;
+			}
+		}
 	}
 	sgx_ocfree();
 	return status;
@@ -806,7 +920,7 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_recv(int* retval, mbedtls_net_context* 
 sgx_status_t SGX_CDECL ocall_mbedtls_net_send(int* retval, mbedtls_net_context* ctx, const unsigned char* buf, size_t len)
 {
 	sgx_status_t status = SGX_SUCCESS;
-	size_t _len_ctx = sizeof(*ctx);
+	size_t _len_ctx = sizeof(mbedtls_net_context);
 	size_t _len_buf = len;
 
 	ms_ocall_mbedtls_net_send_t* ms = NULL;
@@ -814,8 +928,12 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_send(int* retval, mbedtls_net_context* 
 	void *__tmp = NULL;
 
 	void *__tmp_ctx = NULL;
-	ocalloc_size += (ctx != NULL && sgx_is_within_enclave(ctx, _len_ctx)) ? _len_ctx : 0;
-	ocalloc_size += (buf != NULL && sgx_is_within_enclave(buf, _len_buf)) ? _len_buf : 0;
+
+	CHECK_ENCLAVE_POINTER(ctx, _len_ctx);
+	CHECK_ENCLAVE_POINTER(buf, _len_buf);
+
+	ocalloc_size += (ctx != NULL) ? _len_ctx : 0;
+	ocalloc_size += (buf != NULL) ? _len_buf : 0;
 
 	__tmp = sgx_ocalloc(ocalloc_size);
 	if (__tmp == NULL) {
@@ -824,28 +942,31 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_send(int* retval, mbedtls_net_context* 
 	}
 	ms = (ms_ocall_mbedtls_net_send_t*)__tmp;
 	__tmp = (void *)((size_t)__tmp + sizeof(ms_ocall_mbedtls_net_send_t));
+	ocalloc_size -= sizeof(ms_ocall_mbedtls_net_send_t);
 
-	if (ctx != NULL && sgx_is_within_enclave(ctx, _len_ctx)) {
+	if (ctx != NULL) {
 		ms->ms_ctx = (mbedtls_net_context*)__tmp;
 		__tmp_ctx = __tmp;
-		memcpy(__tmp_ctx, ctx, _len_ctx);
+		if (memcpy_s(__tmp_ctx, ocalloc_size, ctx, _len_ctx)) {
+			sgx_ocfree();
+			return SGX_ERROR_UNEXPECTED;
+		}
 		__tmp = (void *)((size_t)__tmp + _len_ctx);
-	} else if (ctx == NULL) {
-		ms->ms_ctx = NULL;
+		ocalloc_size -= _len_ctx;
 	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
+		ms->ms_ctx = NULL;
 	}
 	
-	if (buf != NULL && sgx_is_within_enclave(buf, _len_buf)) {
-		ms->ms_buf = (unsigned char*)__tmp;
-		memcpy(__tmp, buf, _len_buf);
+	if (buf != NULL) {
+		ms->ms_buf = (const unsigned char*)__tmp;
+		if (memcpy_s(__tmp, ocalloc_size, buf, _len_buf)) {
+			sgx_ocfree();
+			return SGX_ERROR_UNEXPECTED;
+		}
 		__tmp = (void *)((size_t)__tmp + _len_buf);
-	} else if (buf == NULL) {
-		ms->ms_buf = NULL;
+		ocalloc_size -= _len_buf;
 	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
+		ms->ms_buf = NULL;
 	}
 	
 	ms->ms_len = len;
@@ -853,7 +974,12 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_send(int* retval, mbedtls_net_context* 
 
 	if (status == SGX_SUCCESS) {
 		if (retval) *retval = ms->ms_retval;
-		if (ctx) memcpy((void*)ctx, __tmp_ctx, _len_ctx);
+		if (ctx) {
+			if (memcpy_s((void*)ctx, _len_ctx, __tmp_ctx, _len_ctx)) {
+				sgx_ocfree();
+				return SGX_ERROR_UNEXPECTED;
+			}
+		}
 	}
 	sgx_ocfree();
 	return status;
@@ -862,7 +988,7 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_send(int* retval, mbedtls_net_context* 
 sgx_status_t SGX_CDECL ocall_mbedtls_net_recv_timeout(int* retval, mbedtls_net_context* ctx, unsigned char* buf, size_t len, uint32_t timeout)
 {
 	sgx_status_t status = SGX_SUCCESS;
-	size_t _len_ctx = sizeof(*ctx);
+	size_t _len_ctx = sizeof(mbedtls_net_context);
 	size_t _len_buf = len;
 
 	ms_ocall_mbedtls_net_recv_timeout_t* ms = NULL;
@@ -871,8 +997,12 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_recv_timeout(int* retval, mbedtls_net_c
 
 	void *__tmp_ctx = NULL;
 	void *__tmp_buf = NULL;
-	ocalloc_size += (ctx != NULL && sgx_is_within_enclave(ctx, _len_ctx)) ? _len_ctx : 0;
-	ocalloc_size += (buf != NULL && sgx_is_within_enclave(buf, _len_buf)) ? _len_buf : 0;
+
+	CHECK_ENCLAVE_POINTER(ctx, _len_ctx);
+	CHECK_ENCLAVE_POINTER(buf, _len_buf);
+
+	ocalloc_size += (ctx != NULL) ? _len_ctx : 0;
+	ocalloc_size += (buf != NULL) ? _len_buf : 0;
 
 	__tmp = sgx_ocalloc(ocalloc_size);
 	if (__tmp == NULL) {
@@ -881,29 +1011,29 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_recv_timeout(int* retval, mbedtls_net_c
 	}
 	ms = (ms_ocall_mbedtls_net_recv_timeout_t*)__tmp;
 	__tmp = (void *)((size_t)__tmp + sizeof(ms_ocall_mbedtls_net_recv_timeout_t));
+	ocalloc_size -= sizeof(ms_ocall_mbedtls_net_recv_timeout_t);
 
-	if (ctx != NULL && sgx_is_within_enclave(ctx, _len_ctx)) {
+	if (ctx != NULL) {
 		ms->ms_ctx = (mbedtls_net_context*)__tmp;
 		__tmp_ctx = __tmp;
-		memcpy(__tmp_ctx, ctx, _len_ctx);
+		if (memcpy_s(__tmp_ctx, ocalloc_size, ctx, _len_ctx)) {
+			sgx_ocfree();
+			return SGX_ERROR_UNEXPECTED;
+		}
 		__tmp = (void *)((size_t)__tmp + _len_ctx);
-	} else if (ctx == NULL) {
-		ms->ms_ctx = NULL;
+		ocalloc_size -= _len_ctx;
 	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
+		ms->ms_ctx = NULL;
 	}
 	
-	if (buf != NULL && sgx_is_within_enclave(buf, _len_buf)) {
+	if (buf != NULL) {
 		ms->ms_buf = (unsigned char*)__tmp;
 		__tmp_buf = __tmp;
 		memset(__tmp_buf, 0, _len_buf);
 		__tmp = (void *)((size_t)__tmp + _len_buf);
-	} else if (buf == NULL) {
-		ms->ms_buf = NULL;
+		ocalloc_size -= _len_buf;
 	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
+		ms->ms_buf = NULL;
 	}
 	
 	ms->ms_len = len;
@@ -912,8 +1042,18 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_recv_timeout(int* retval, mbedtls_net_c
 
 	if (status == SGX_SUCCESS) {
 		if (retval) *retval = ms->ms_retval;
-		if (ctx) memcpy((void*)ctx, __tmp_ctx, _len_ctx);
-		if (buf) memcpy((void*)buf, __tmp_buf, _len_buf);
+		if (ctx) {
+			if (memcpy_s((void*)ctx, _len_ctx, __tmp_ctx, _len_ctx)) {
+				sgx_ocfree();
+				return SGX_ERROR_UNEXPECTED;
+			}
+		}
+		if (buf) {
+			if (memcpy_s((void*)buf, _len_buf, __tmp_buf, _len_buf)) {
+				sgx_ocfree();
+				return SGX_ERROR_UNEXPECTED;
+			}
+		}
 	}
 	sgx_ocfree();
 	return status;
@@ -922,14 +1062,17 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_recv_timeout(int* retval, mbedtls_net_c
 sgx_status_t SGX_CDECL ocall_mbedtls_net_free(mbedtls_net_context* ctx)
 {
 	sgx_status_t status = SGX_SUCCESS;
-	size_t _len_ctx = sizeof(*ctx);
+	size_t _len_ctx = sizeof(mbedtls_net_context);
 
 	ms_ocall_mbedtls_net_free_t* ms = NULL;
 	size_t ocalloc_size = sizeof(ms_ocall_mbedtls_net_free_t);
 	void *__tmp = NULL;
 
 	void *__tmp_ctx = NULL;
-	ocalloc_size += (ctx != NULL && sgx_is_within_enclave(ctx, _len_ctx)) ? _len_ctx : 0;
+
+	CHECK_ENCLAVE_POINTER(ctx, _len_ctx);
+
+	ocalloc_size += (ctx != NULL) ? _len_ctx : 0;
 
 	__tmp = sgx_ocalloc(ocalloc_size);
 	if (__tmp == NULL) {
@@ -938,23 +1081,30 @@ sgx_status_t SGX_CDECL ocall_mbedtls_net_free(mbedtls_net_context* ctx)
 	}
 	ms = (ms_ocall_mbedtls_net_free_t*)__tmp;
 	__tmp = (void *)((size_t)__tmp + sizeof(ms_ocall_mbedtls_net_free_t));
+	ocalloc_size -= sizeof(ms_ocall_mbedtls_net_free_t);
 
-	if (ctx != NULL && sgx_is_within_enclave(ctx, _len_ctx)) {
+	if (ctx != NULL) {
 		ms->ms_ctx = (mbedtls_net_context*)__tmp;
 		__tmp_ctx = __tmp;
-		memcpy(__tmp_ctx, ctx, _len_ctx);
+		if (memcpy_s(__tmp_ctx, ocalloc_size, ctx, _len_ctx)) {
+			sgx_ocfree();
+			return SGX_ERROR_UNEXPECTED;
+		}
 		__tmp = (void *)((size_t)__tmp + _len_ctx);
-	} else if (ctx == NULL) {
-		ms->ms_ctx = NULL;
+		ocalloc_size -= _len_ctx;
 	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
+		ms->ms_ctx = NULL;
 	}
 	
 	status = sgx_ocall(9, ms);
 
 	if (status == SGX_SUCCESS) {
-		if (ctx) memcpy((void*)ctx, __tmp_ctx, _len_ctx);
+		if (ctx) {
+			if (memcpy_s((void*)ctx, _len_ctx, __tmp_ctx, _len_ctx)) {
+				sgx_ocfree();
+				return SGX_ERROR_UNEXPECTED;
+			}
+		}
 	}
 	sgx_ocfree();
 	return status;
@@ -969,7 +1119,10 @@ sgx_status_t SGX_CDECL ocall_print_string(int* retval, const char* str)
 	size_t ocalloc_size = sizeof(ms_ocall_print_string_t);
 	void *__tmp = NULL;
 
-	ocalloc_size += (str != NULL && sgx_is_within_enclave(str, _len_str)) ? _len_str : 0;
+
+	CHECK_ENCLAVE_POINTER(str, _len_str);
+
+	ocalloc_size += (str != NULL) ? _len_str : 0;
 
 	__tmp = sgx_ocalloc(ocalloc_size);
 	if (__tmp == NULL) {
@@ -978,16 +1131,18 @@ sgx_status_t SGX_CDECL ocall_print_string(int* retval, const char* str)
 	}
 	ms = (ms_ocall_print_string_t*)__tmp;
 	__tmp = (void *)((size_t)__tmp + sizeof(ms_ocall_print_string_t));
+	ocalloc_size -= sizeof(ms_ocall_print_string_t);
 
-	if (str != NULL && sgx_is_within_enclave(str, _len_str)) {
-		ms->ms_str = (char*)__tmp;
-		memcpy(__tmp, str, _len_str);
+	if (str != NULL) {
+		ms->ms_str = (const char*)__tmp;
+		if (memcpy_s(__tmp, ocalloc_size, str, _len_str)) {
+			sgx_ocfree();
+			return SGX_ERROR_UNEXPECTED;
+		}
 		__tmp = (void *)((size_t)__tmp + _len_str);
-	} else if (str == NULL) {
-		ms->ms_str = NULL;
+		ocalloc_size -= _len_str;
 	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
+		ms->ms_str = NULL;
 	}
 	
 	status = sgx_ocall(10, ms);
